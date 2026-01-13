@@ -7,15 +7,20 @@ We are upgrading the existing "The Move" app from using local mock data to using
 - React (Vite)
 - Firebase SDK
 
-**Credentials (Use these to initialize app):**
+**Credentials:**
+Get your Firebase credentials from your Firebase project settings. Store them in environment variables (see `ENV_SETUP.md`).
+
+Example structure:
+```javascript
 const firebaseConfig = {
-    apiKey: "AIzaSyARVoyxlPtP5ls5N6oSndCFLNQb89gkQ_g",
-  authDomain: "teamred-themove.firebaseapp.com",
-  projectId: "teamred-themove",
-  storageBucket: "teamred-themove.firebasestorage.app",
-  messagingSenderId: "457325441176",
-  appId: "1:457325441176:web:cafffe17a364ab28aa60ed"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
+```
 
 **Task Requirements:**
 

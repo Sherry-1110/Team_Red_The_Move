@@ -28,16 +28,18 @@ For local development, create a `.env.local` file in the root directory:
 cp .env.example .env.local
 ```
 
-Then edit `.env.local` with your Firebase credentials from `docs/app-vision.md`:
+Then edit `.env.local` with your Firebase credentials from your Firebase project settings:
 
 ```env
-VITE_FIREBASE_API_KEY=AIzaSyARVoyxlPtP5ls5N6oSndCFLNQb89gkQ_g
-VITE_FIREBASE_AUTH_DOMAIN=teamred-themove.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=teamred-themove
-VITE_FIREBASE_STORAGE_BUCKET=teamred-themove.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=457325441176
-VITE_FIREBASE_APP_ID=1:457325441176:web:cafffe17a364ab28aa60ed
+VITE_FIREBASE_API_KEY=your-api-key-here
+VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project-id.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
 ```
+
+**Get your credentials from:** Firebase Console → Project Settings → General → Your apps
 
 **Note:** `.env.local` is already in `.gitignore` and will not be committed to git.
 
@@ -91,14 +93,16 @@ You have two options: **GitHub Integration** (recommended) or **Vercel CLI**.
    - Click on "Environment Variables" section
    - Add the following 6 variables (one at a time):
    
-   | Variable Name | Value |
-   |--------------|-------|
-   | `VITE_FIREBASE_API_KEY` | `AIzaSyARVoyxlPtP5ls5N6oSndCFLNQb89gkQ_g` |
-   | `VITE_FIREBASE_AUTH_DOMAIN` | `teamred-themove.firebaseapp.com` |
-   | `VITE_FIREBASE_PROJECT_ID` | `teamred-themove` |
-   | `VITE_FIREBASE_STORAGE_BUCKET` | `teamred-themove.firebasestorage.app` |
-   | `VITE_FIREBASE_MESSAGING_SENDER_ID` | `457325441176` |
-   | `VITE_FIREBASE_APP_ID` | `1:457325441176:web:cafffe17a364ab28aa60ed` |
+   | Variable Name | Value (from Firebase Console) |
+   |--------------|------------------------------|
+   | `VITE_FIREBASE_API_KEY` | Your Firebase API Key |
+   | `VITE_FIREBASE_AUTH_DOMAIN` | `your-project-id.firebaseapp.com` |
+   | `VITE_FIREBASE_PROJECT_ID` | Your Firebase Project ID |
+   | `VITE_FIREBASE_STORAGE_BUCKET` | `your-project-id.firebasestorage.app` |
+   | `VITE_FIREBASE_MESSAGING_SENDER_ID` | Your Messaging Sender ID |
+   | `VITE_FIREBASE_APP_ID` | Your Firebase App ID |
+   
+   **Get these values from:** Firebase Console → Project Settings → General → Your apps
    
    - For each variable, select **all environments** (Production, Preview, Development)
    - Click "Save" after adding each variable
@@ -130,24 +134,26 @@ You have two options: **GitHub Integration** (recommended) or **Vercel CLI**.
    **Option 1: Interactive setup**
    ```bash
    vercel env add VITE_FIREBASE_API_KEY
-   # Enter: AIzaSyARVoyxlPtP5ls5N6oSndCFLNQb89gkQ_g
+   # Enter: your-api-key-from-firebase-console
    # Select: Production, Preview, Development (all)
    
    vercel env add VITE_FIREBASE_AUTH_DOMAIN
-   # Enter: teamred-themove.firebaseapp.com
+   # Enter: your-project-id.firebaseapp.com
    
    vercel env add VITE_FIREBASE_PROJECT_ID
-   # Enter: teamred-themove
+   # Enter: your-project-id
    
    vercel env add VITE_FIREBASE_STORAGE_BUCKET
-   # Enter: teamred-themove.firebasestorage.app
+   # Enter: your-project-id.firebasestorage.app
    
    vercel env add VITE_FIREBASE_MESSAGING_SENDER_ID
-   # Enter: 457325441176
+   # Enter: your-messaging-sender-id
    
    vercel env add VITE_FIREBASE_APP_ID
-   # Enter: 1:457325441176:web:cafffe17a364ab28aa60ed
+   # Enter: your-app-id
    ```
+   
+   **Get these values from:** Firebase Console → Project Settings → General → Your apps
    
    **Option 2: Use .env file** (recommended for first-time setup)
    - Create `.env.local` with your Firebase config (see Step 1.1.1)

@@ -23,13 +23,15 @@ touch .env.local
 
 2. **Add your Firebase credentials** to `.env.local`:
 
+Get your Firebase credentials from: **Firebase Console → Project Settings → General → Your apps**
+
 ```env
-VITE_FIREBASE_API_KEY=AIzaSyARVoyxlPtP5ls5N6oSndCFLNQb89gkQ_g
-VITE_FIREBASE_AUTH_DOMAIN=teamred-themove.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=teamred-themove
-VITE_FIREBASE_STORAGE_BUCKET=teamred-themove.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=457325441176
-VITE_FIREBASE_APP_ID=1:457325441176:web:cafffe17a364ab28aa60ed
+VITE_FIREBASE_API_KEY=your-api-key-here
+VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project-id.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
 ```
 
 3. **Restart your dev server** if it's already running:
@@ -48,14 +50,16 @@ See `DEPLOYMENT.md` for detailed instructions on setting environment variables i
 
 In Vercel Dashboard → Your Project → Settings → Environment Variables, add:
 
-| Variable Name | Value |
-|--------------|-------|
-| `VITE_FIREBASE_API_KEY` | `AIzaSyARVoyxlPtP5ls5N6oSndCFLNQb89gkQ_g` |
-| `VITE_FIREBASE_AUTH_DOMAIN` | `teamred-themove.firebaseapp.com` |
-| `VITE_FIREBASE_PROJECT_ID` | `teamred-themove` |
-| `VITE_FIREBASE_STORAGE_BUCKET` | `teamred-themove.firebasestorage.app` |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | `457325441176` |
-| `VITE_FIREBASE_APP_ID` | `1:457325441176:web:cafffe17a364ab28aa60ed` |
+| Variable Name | Value (from Firebase Console) |
+|--------------|------------------------------|
+| `VITE_FIREBASE_API_KEY` | Your Firebase API Key |
+| `VITE_FIREBASE_AUTH_DOMAIN` | `your-project-id.firebaseapp.com` |
+| `VITE_FIREBASE_PROJECT_ID` | Your Firebase Project ID |
+| `VITE_FIREBASE_STORAGE_BUCKET` | `your-project-id.firebasestorage.app` |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Your Messaging Sender ID |
+| `VITE_FIREBASE_APP_ID` | Your Firebase App ID |
+
+**Get these values from:** Firebase Console → Project Settings → General → Your apps
 
 Make sure to select **all environments** (Production, Preview, Development) for each variable.
 
