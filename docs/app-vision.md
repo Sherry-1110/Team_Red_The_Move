@@ -1,4 +1,40 @@
-# Name
+# App Vision: The Move (Backend Upgrade)
+
+**Context:**
+We are upgrading the existing "The Move" app from using local mock data to using **Firebase Firestore** as the real backend.
+
+**Tech Stack:**
+- React (Vite)
+- Firebase SDK
+
+**Credentials (Use these to initialize app):**
+const firebaseConfig = {
+    apiKey: "AIzaSyARVoyxlPtP5ls5N6oSndCFLNQb89gkQ_g",
+  authDomain: "teamred-themove.firebaseapp.com",
+  projectId: "teamred-themove",
+  storageBucket: "teamred-themove.firebasestorage.app",
+  messagingSenderId: "457325441176",
+  appId: "1:457325441176:web:cafffe17a364ab28aa60ed"
+};
+
+**Task Requirements:**
+
+1.  **Initialize Firebase:**
+    - Create a new file `src/firebase.js`.
+    - Initialize the app using the config above.
+    - Export `db` (the Firestore instance).
+
+2.  **Refactor Data Logic (App.jsx / Context):**
+    - **Read:** Replace the `useState` mock data array with a `useEffect` hook that listens to the `moves` collection in real-time (`onSnapshot`).
+    - **Create:** Update the "Post" function to use `addDoc` to save new events to Firestore.
+    - **Delete:** Update the "Delete" function to use `deleteDoc`.
+    - **Join/Unjoin:** Update the join logic to modify the specific document in Firestore (`updateDoc`).
+
+3.  **UI Preservation:**
+    - **CRITICAL:** Do NOT change any UI styles, layout, or CSS. Only change the JavaScript logic responsible for data fetching.
+    
+    
+    # Name
 
 - The app is called The Move.
 
@@ -16,7 +52,7 @@ Simple mobile-friendly design with a bottom navigation bar for Explore, Create, 
   - A scrollable Explore feed of cards with the newest items first.
   - Filter chips at the top for campus areas such as North, South, Downtown, and Other, and a second set of filter chips for activity type such as Food, Study, Sports, Social, and Other.
   - A search bar to filter moves by keyword.
-  - Move cards showing title, description, location, start time, end time, activity type, participant count, and a Join button.
+  - Move cards showing title, descriptåion, location, start time, end time, activity type, participant count, and a Join button.
   - Move cards display a status badge saying Live Now if the event has started, Upcoming if it is scheduled for later, or Past if the it has ended.
 
 Simple operations:
