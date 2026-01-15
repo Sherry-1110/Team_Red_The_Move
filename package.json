@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest --ui",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "deploy": "firebase deploy --only hosting"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
@@ -31,6 +32,7 @@
     "eslint": "^9.39.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
+    "firebase-tools": "^14.0.0",
     "globals": "^17.0.0",
     "jsdom": "^22.1.0",
     "typescript": "~5.9.3",
