@@ -348,6 +348,9 @@ img {
   border-radius: 999px;
   background: rgba(78, 42, 132, 0.12);
   color: var(--purple);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .status-badge--past {
@@ -602,6 +605,7 @@ img {
 .detail__status {
   display: grid;
   justify-items: end;
+  align-items: start;
   gap: 8px;
 }
 
@@ -711,7 +715,7 @@ img {
   flex: 1;
   border-radius: 999px;
   border: 1px solid var(--border);
-  padding: 10px 12px;
+  padding: 10px 20px; 
 }
 
 .muted {
@@ -729,6 +733,72 @@ img {
   border: 0;
 }
 
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(140deg, rgba(78, 42, 132, 0.22), rgba(249, 196, 92, 0.45));
+}
+
+.login-container {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 32px;
+}
+
+.login-header {
+  text-align: center;
+}
+
+.login-header h1 {
+  margin: 8px 0 0;
+  color: var(--plum);
+}
+
+.login-header p {
+  margin: 0;
+}
+
+.login-content {
+  display: grid;
+  gap: 16px;
+  text-align: center;
+}
+
+.login-content h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--plum);
+}
+
+.login-content p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.login-error {
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid #ff4444;
+  color: #cc0000;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px 18px;
+  font-size: 1rem;
+}
+
 @media (max-width: 600px) {
   .header-card {
     flex-direction: column;
@@ -738,5 +808,10 @@ img {
   .detail {
     max-height: 100vh;
     border-radius: 16px;
+  }
+
+  .login-container {
+    padding: 24px;
+    gap: 24px;
   }
 }

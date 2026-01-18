@@ -10,10 +10,14 @@ import {
 import { db } from './firebase';
 import type { Move, User, Comment } from './types';
 import { firestoreDocToMove, sortByNewest, createId } from './utilities/helpers';
+import { signOut } from './utilities/auth';
+import { useAuth } from './contexts/AuthContext';
 import { ExploreScreen } from './components/ExploreScreen';
 import { CreateMoveScreen } from './components/CreateMoveScreen';
 import { MyMovesScreen } from './components/MyMovesScreen';
 import { MoveDetailScreen } from './components/MoveDetailScreen';
+import { EditMoveScreen } from './components/EditMoveScreen';
+import { LoginScreen } from './components/LoginScreen';
 import { BottomNav } from './components/BottomNav';
 
 const defaultUser: User = {
@@ -22,11 +26,20 @@ const defaultUser: User = {
 };
 
 const App = () => {
-  const [user] = useState<User>(defaultUser);
+  const { user: firebaseUser, loading } = useAuth();
   const [moves, setMoves] = useState<Move[]>([]);
   const [activeTab, setActiveTab] = useState<'explore' | 'create' | 'profile'>('explore');
   const [selectedMoveId, setSelectedMoveId] = useState<string | null>(null);
+  const [editingMoveId, setEditingMoveId] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
+
+  // Convert Firebase user to app user
+  const user: User = firebaseUser
+    ? {
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+      }
+    : defaultUser;
 
   // Listen to Firestore moves collection in real-time
   useEffect(() => {
@@ -62,10 +75,10 @@ const App = () => {
   const joinedMoves = useMemo(() => {
     return sortByNewest(
       moves.filter(
-        (move) => move.hostId !== user.id && move.attendees.includes(user.name),
+        (move) => move.attendees.includes(user.name),
       ),
     );
-  }, [moves, user.id, user.name]);
+  }, [moves, user.name]);
 
   const hostingMoves = useMemo(
     () => sortByNewest(moves.filter((move) => move.hostId === user.id)),
@@ -107,6 +120,35 @@ const App = () => {
       setSelectedMoveId((current) => (current === moveId ? null : current));
     } catch (error) {
       console.error('Error canceling move:', error);
+    }
+  };
+
+  const handleEditMove = async (
+    moveId: string,
+    formData: {
+      title: string;
+      description: string;
+      location: string;
+      startTime: string;
+      endTime: string;
+      area: string;
+      activityType: string;
+    },
+  ) => {
+    try {
+      const moveRef = doc(db, 'moves', moveId);
+      await updateDoc(moveRef, {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        location: formData.location.trim(),
+        startTime: new Date(formData.startTime).toISOString(),
+        endTime: new Date(formData.endTime).toISOString(),
+        area: formData.area,
+        activityType: formData.activityType,
+      });
+      setEditingMoveId(null);
+    } catch (error) {
+      console.error('Error editing move:', error);
     }
   };
 
@@ -161,16 +203,61 @@ const App = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setActiveTab('explore');
+      setSelectedMoveId(null);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  // Show loading screen while auth is being determined
+  if (loading) {
+    return (
+      <div className="app-shell">
+        <div className="screen">
+          <header className="app-header">
+            <div>
+              <p className="eyebrow">Northwestern Student Hangouts</p>
+              <h1>The Move</h1>
+              <p className="tagline">A live feed for spontaneous campus plans.</p>
+            </div>
+          </header>
+          <main className="app-main" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p>Loading...</p>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login screen if not authenticated
+  if (!firebaseUser) {
+    return <LoginScreen onSignIn={() => {}} />;
+  }
+
   return (
     <div className="app-shell">
       <div className="screen">
-        <header className="app-header">
-          <div>
-            <p className="eyebrow">Northwestern Student Hangouts</p>
-            <h1>The Move</h1>
-            <p className="tagline">A live feed for spontaneous campus plans.</p>
-          </div>
-        </header>
+        {activeTab === 'explore' && (
+          <header className="app-header">
+            <div>
+              <p className="eyebrow">Northwestern Student Hangouts</p>
+              <h1>The Move</h1>
+              <p className="tagline">A live feed for spontaneous campus plans.</p>
+            </div>
+            <button
+              type="button"
+              className="btn btn--ghost btn--small"
+              onClick={handleSignOut}
+              style={{ position: 'absolute', top: '20px', right: '20px' }}
+            >
+              Sign Out
+            </button>
+          </header>
+        )}
 
         <main className="app-main">
           {activeTab === 'explore' && (
@@ -195,6 +282,7 @@ const App = () => {
               onLeaveMove={handleLeaveMove}
               onCancelMove={handleCancelMove}
               onSelectMove={setSelectedMoveId}
+              onEditMove={setEditingMoveId}
             />
           )}
         </main>
@@ -213,6 +301,14 @@ const App = () => {
           onCancelMove={handleCancelMove}
           onAddComment={handleAddComment}
           onClose={() => setSelectedMoveId(null)}
+        />
+      )}
+
+      {editingMoveId && (
+        <EditMoveScreen
+          move={moves.find((m) => m.id === editingMoveId)!}
+          onEditMove={handleEditMove}
+          onClose={() => setEditingMoveId(null)}
         />
       )}
     </div>
