@@ -37,7 +37,6 @@
 
 body {
   margin: 0;
-  font-family: "Space Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: var(--ink);
   background: linear-gradient(140deg, rgba(78, 42, 132, 0.22), rgba(249, 196, 92, 0.45));
   min-height: 100vh;
@@ -107,6 +106,7 @@ img {
 }
 
 .eyebrow {
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-size: 0.7rem;
@@ -115,13 +115,14 @@ img {
 }
 
 .app-header h1 {
-  font-family: "Fraunces", "Times New Roman", serif;
   font-size: clamp(2.5rem, 3vw, 3.5rem);
+  font-weight: 700;
   margin: 0;
   color: var(--plum);
 }
 
 .tagline {
+  font-weight: 400;
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 1rem;
@@ -139,6 +140,7 @@ img {
 }
 
 .header-card h2 {
+  font-weight: 700;
   margin: 0 0 6px;
   font-size: 1.25rem;
   color: var(--plum);
@@ -160,6 +162,7 @@ img {
 }
 
 .header-card__stat span {
+  font-weight: 500;
   font-size: 0.7rem;
   text-transform: uppercase;
   color: var(--muted);
@@ -167,6 +170,7 @@ img {
 }
 
 .header-card__stat strong {
+  font-weight: 700;
   font-size: 1.1rem;
   color: var(--plum);
 }
@@ -249,6 +253,7 @@ img {
 }
 
 .filter-option span {
+  font-weight: 500;
   color: var(--plum);
   font-size: 0.95rem;
 }
@@ -316,17 +321,20 @@ img {
 }
 
 .move-card__header h3 {
+  font-weight: 700;
   margin: 0;
   font-size: 1.1rem;
 }
 
 .move-card__subtitle {
+  font-weight: 400;
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 0.85rem;
 }
 
 .move-card__time {
+  font-weight: 400;
   font-size: 0.8rem;
   color: var(--muted);
 }
@@ -348,6 +356,7 @@ img {
 }
 
 .move-card__description {
+  font-weight: 400;
   margin: 0;
   color: var(--plum);
 }
@@ -356,6 +365,7 @@ img {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  font-weight: 400;
   color: var(--muted);
   font-size: 0.85rem;
 }
@@ -422,6 +432,7 @@ img {
 }
 
 .panel-heading h2 {
+  font-weight: 700;
   margin: 0;
   font-size: 1.4rem;
 }
@@ -502,6 +513,7 @@ img {
 }
 
 .empty-state h3 {
+  font-weight: 700;
   margin: 0 0 8px;
 }
 
@@ -594,21 +606,25 @@ img {
 }
 
 .detail__header h2 {
+  font-weight: 700;
   margin: 0;
   font-size: 1.6rem;
 }
 
 .detail__subtitle {
+  font-weight: 400;
   margin: 6px 0 0;
   color: var(--muted);
 }
 
 .detail__time {
+  font-weight: 400;
   font-size: 0.85rem;
   color: var(--muted);
 }
 
 .detail__description {
+  font-weight: 400;
   margin: 0;
   color: var(--plum);
 }
@@ -617,12 +633,14 @@ img {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
+  font-weight: 500;
   background: var(--cream);
   padding: 14px;
   border-radius: 16px;
 }
 
 .detail__meta strong {
+  font-weight: 700;
   display: block;
   margin-bottom: 4px;
 }
@@ -650,6 +668,7 @@ img {
 }
 
 .detail__attendees li {
+  font-weight: 500;
   background: rgba(78, 42, 132, 0.08);
   padding: 8px 12px;
   border-radius: 999px;
