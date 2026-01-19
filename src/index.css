@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
 
 @theme {
   --animate-logo-spin: logo-spin infinite 20s linear;
@@ -308,6 +308,34 @@ img {
   gap: 12px;
 }
 
+.move-card__content--horizontal {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.move-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(78, 42, 132, 0.12);
+  border: 1px solid rgba(78, 42, 132, 0.15);
+  color: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.move-card__body {
+  display: grid;
+  gap: 12px;
+  flex: 1;
+}
+
 .move-card__header {
   display: flex;
   justify-content: space-between;
@@ -328,6 +356,12 @@ img {
 
 .move-card__subtitle {
   font-weight: 400;
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.move-card__remarks {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 0.85rem;
@@ -801,6 +835,15 @@ img {
 
 @media (max-width: 600px) {
   .header-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .move-card__content--horizontal {
+    flex-direction: column;
+  }
+
+  .move-card__content--horizontal .move-card__header {
     flex-direction: column;
     align-items: flex-start;
   }

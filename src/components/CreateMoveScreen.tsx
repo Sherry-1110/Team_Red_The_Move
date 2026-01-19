@@ -5,9 +5,11 @@ import { AREA_FILTERS, ACTIVITY_FILTERS } from '../types';
 type FormState = {
   title: string;
   description: string;
+  remarks: string;
   location: string;
   startTime: string;
   endTime: string;
+  maxParticipants: number;
   area: CampusArea;
   activityType: ActivityType;
 };
@@ -20,9 +22,11 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
   const [formState, setFormState] = useState<FormState>({
     title: '',
     description: '',
+    remarks: '',
     location: '',
     startTime: '',
     endTime: '',
+    maxParticipants: 1,
     area: 'North',
     activityType: 'Social',
   });
@@ -43,6 +47,10 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
       );
       return;
     }
+    if (!Number.isFinite(formState.maxParticipants) || formState.maxParticipants < 1) {
+      setFormError('Max participants must be at least 1.');
+      return;
+    }
     const start = new Date(formState.startTime).getTime();
     const end = new Date(formState.endTime).getTime();
     if (Number.isNaN(start) || Number.isNaN(end) || end <= start) {
@@ -54,9 +62,11 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
     setFormState({
       title: '',
       description: '',
+      remarks: '',
       location: '',
       startTime: '',
       endTime: '',
+      maxParticipants: 1,
       area: 'North',
       activityType: 'Social',
     });
@@ -89,6 +99,17 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
               setFormState((prev) => ({ ...prev, description: event.target.value }))
             }
             placeholder="What&apos;s the vibe? What should people bring?"
+          />
+        </label>
+        <label>
+          <span>Remarks</span>
+          <input
+            type="text"
+            value={formState.remarks}
+            onChange={(event) =>
+              setFormState((prev) => ({ ...prev, remarks: event.target.value }))
+            }
+            placeholder="Optional notes for attendees"
           />
         </label>
         <label>
@@ -125,6 +146,22 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
           </label>
         </div>
         <div className="form-row">
+          <label>
+            <span>Max Participants</span>
+            <input
+              type="number"
+              min={1}
+              required
+              value={formState.maxParticipants}
+              onChange={(event) => {
+                const nextValue = event.target.valueAsNumber;
+                setFormState((prev) => ({
+                  ...prev,
+                  maxParticipants: Number.isNaN(nextValue) ? prev.maxParticipants : nextValue,
+                }));
+              }}
+            />
+          </label>
           <label>
             <span>Activity Type</span>
             <select

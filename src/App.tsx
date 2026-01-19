@@ -88,6 +88,7 @@ const App = () => {
   const handleJoinMove = async (moveId: string) => {
     const move = moves.find((m) => m.id === moveId);
     if (!move || move.attendees.includes(user.name)) return;
+    if (move.attendees.length >= move.maxParticipants) return;
 
     try {
       const moveRef = doc(db, 'moves', moveId);
@@ -155,9 +156,11 @@ const App = () => {
   const handleCreateMove = async (formData: {
     title: string;
     description: string;
+    remarks: string;
     location: string;
     startTime: string;
     endTime: string;
+    maxParticipants: number;
     area: string;
     activityType: string;
   }) => {
@@ -166,6 +169,7 @@ const App = () => {
       await addDoc(movesCollection, {
         title: formData.title.trim(),
         description: formData.description.trim(),
+        remarks: formData.remarks.trim(),
         location: formData.location.trim(),
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),
@@ -175,6 +179,7 @@ const App = () => {
         hostId: user.id,
         hostName: user.name,
         attendees: [user.name],
+        maxParticipants: formData.maxParticipants,
         comments: [],
       });
       setActiveTab('explore');

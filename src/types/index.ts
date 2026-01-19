@@ -12,6 +12,7 @@ export type Move = {
   id: string;
   title: string;
   description: string;
+  remarks: string;
   location: string;
   startTime: string;
   endTime: string;
@@ -21,6 +22,7 @@ export type Move = {
   hostId: string;
   hostName: string;
   attendees: string[];
+  maxParticipants: number;
   comments: Comment[];
 };
 
