@@ -6,7 +6,6 @@ type MyMovesScreenProps = {
   joinedMoves: Move[];
   hostingMoves: Move[];
   now: number;
-  onLeaveMove: (moveId: string) => void;
   onCancelMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
   onEditMove?: (moveId: string) => void;
@@ -16,7 +15,6 @@ export const MyMovesScreen = ({
   joinedMoves,
   hostingMoves,
   now,
-  onLeaveMove,
   onCancelMove,
   onSelectMove,
   onEditMove,
@@ -83,13 +81,6 @@ export const MyMovesScreen = ({
                     <div className="move-card__footer">
                       <span className="attendee-count">{move.attendees.length} going</span>
                       <div className="move-card__actions">
-                        <button
-                          className="btn btn--ghost btn--small"
-                          type="button"
-                          onClick={() => onLeaveMove(move.id)}
-                        >
-                          Leave
-                        </button>
                         <button
                           className="btn btn--small"
                           type="button"

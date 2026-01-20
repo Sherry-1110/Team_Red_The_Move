@@ -8,7 +8,6 @@ type MoveDetailScreenProps = {
   userId: string;
   userName: string;
   onJoinMove: (moveId: string) => void;
-  onLeaveMove: (moveId: string) => void;
   onCancelMove: (moveId: string) => void;
   onAddComment: (moveId: string, text: string) => void;
   onClose: () => void;
@@ -20,7 +19,6 @@ export const MoveDetailScreen = ({
   userId,
   userName,
   onJoinMove,
-  onLeaveMove,
   onCancelMove,
   onAddComment,
   onClose,
@@ -95,15 +93,6 @@ export const MoveDetailScreen = ({
             >
               {move.attendees.includes(userName) ? 'Joined' : 'Join'}
             </button>
-            {move.attendees.includes(userName) && move.hostId !== userId && (
-              <button
-                className="btn btn--ghost"
-                type="button"
-                onClick={() => onLeaveMove(move.id)}
-              >
-                Leave
-              </button>
-            )}
             {move.hostId === userId && (
               <button
                 className="btn btn--ghost"

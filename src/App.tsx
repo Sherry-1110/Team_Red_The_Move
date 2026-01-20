@@ -75,10 +75,10 @@ const App = () => {
   const joinedMoves = useMemo(() => {
     return sortByNewest(
       moves.filter(
-        (move) => move.attendees.includes(user.name),
+        (move) => move.attendees.includes(user.name) && move.hostId !== user.id,
       ),
     );
-  }, [moves, user.name]);
+  }, [moves, user.id, user.name]);
 
   const hostingMoves = useMemo(
     () => sortByNewest(moves.filter((move) => move.hostId === user.id)),
@@ -88,6 +88,7 @@ const App = () => {
   const handleJoinMove = async (moveId: string) => {
     const move = moves.find((m) => m.id === moveId);
     if (!move || move.attendees.includes(user.name)) return;
+    if (move.attendees.length >= move.maxParticipants) return;
 
     try {
       const moveRef = doc(db, 'moves', moveId);
@@ -96,20 +97,6 @@ const App = () => {
       });
     } catch (error) {
       console.error('Error joining move:', error);
-    }
-  };
-
-  const handleLeaveMove = async (moveId: string) => {
-    const move = moves.find((m) => m.id === moveId);
-    if (!move || !move.attendees.includes(user.name)) return;
-
-    try {
-      const moveRef = doc(db, 'moves', moveId);
-      await updateDoc(moveRef, {
-        attendees: move.attendees.filter((attendee) => attendee !== user.name),
-      });
-    } catch (error) {
-      console.error('Error leaving move:', error);
     }
   };
 
@@ -155,9 +142,11 @@ const App = () => {
   const handleCreateMove = async (formData: {
     title: string;
     description: string;
+    remarks: string;
     location: string;
     startTime: string;
     endTime: string;
+    maxParticipants: number;
     area: string;
     activityType: string;
   }) => {
@@ -166,6 +155,7 @@ const App = () => {
       await addDoc(movesCollection, {
         title: formData.title.trim(),
         description: formData.description.trim(),
+        remarks: formData.remarks.trim(),
         location: formData.location.trim(),
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),
@@ -175,6 +165,7 @@ const App = () => {
         hostId: user.id,
         hostName: user.name,
         attendees: [user.name],
+        maxParticipants: formData.maxParticipants,
         comments: [],
       });
       setActiveTab('explore');
@@ -279,7 +270,6 @@ const App = () => {
               joinedMoves={joinedMoves}
               hostingMoves={hostingMoves}
               now={now}
-              onLeaveMove={handleLeaveMove}
               onCancelMove={handleCancelMove}
               onSelectMove={setSelectedMoveId}
               onEditMove={setEditingMoveId}
@@ -297,7 +287,6 @@ const App = () => {
           userId={user.id}
           userName={user.name}
           onJoinMove={handleJoinMove}
-          onLeaveMove={handleLeaveMove}
           onCancelMove={handleCancelMove}
           onAddComment={handleAddComment}
           onClose={() => setSelectedMoveId(null)}
