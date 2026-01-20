@@ -100,6 +100,21 @@ const App = () => {
     }
   };
 
+  const handleLeaveMove = async (moveId: string) => {
+    const move = moves.find((m) => m.id === moveId);
+    if (!move || !move.attendees.includes(user.name)) return;
+
+    try {
+      const moveRef = doc(db, 'moves', moveId);
+      await updateDoc(moveRef, {
+        attendees: move.attendees.filter((name) => name !== user.name),
+      });
+      setSelectedMoveId((current) => (current === moveId ? null : current));
+    } catch (error) {
+      console.error('Error leaving move:', error);
+    }
+  };
+
   const handleCancelMove = async (moveId: string) => {
     try {
       const moveRef = doc(db, 'moves', moveId);
@@ -257,6 +272,7 @@ const App = () => {
               now={now}
               userName={user.name}
               onJoinMove={handleJoinMove}
+              onLeaveMove={handleLeaveMove}
               onSelectMove={setSelectedMoveId}
             />
           )}
@@ -271,6 +287,7 @@ const App = () => {
               hostingMoves={hostingMoves}
               now={now}
               onCancelMove={handleCancelMove}
+              onLeaveMove={handleLeaveMove}
               onSelectMove={setSelectedMoveId}
               onEditMove={setEditingMoveId}
             />
@@ -287,6 +304,7 @@ const App = () => {
           userId={user.id}
           userName={user.name}
           onJoinMove={handleJoinMove}
+          onLeaveMove={handleLeaveMove}
           onCancelMove={handleCancelMove}
           onAddComment={handleAddComment}
           onClose={() => setSelectedMoveId(null)}

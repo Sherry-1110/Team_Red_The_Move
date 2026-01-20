@@ -8,6 +8,7 @@ type MoveDetailScreenProps = {
   userId: string;
   userName: string;
   onJoinMove: (moveId: string) => void;
+  onLeaveMove: (moveId: string) => void;
   onCancelMove: (moveId: string) => void;
   onAddComment: (moveId: string, text: string) => void;
   onClose: () => void;
@@ -19,6 +20,7 @@ export const MoveDetailScreen = ({
   userId,
   userName,
   onJoinMove,
+  onLeaveMove,
   onCancelMove,
   onAddComment,
   onClose,
@@ -85,21 +87,32 @@ export const MoveDetailScreen = ({
             {move.attendees.length} going
           </span>
           <div className="detail__buttons">
-            <button
-              className={`btn ${move.attendees.includes(userName) ? 'btn--ghost' : 'btn--primary'}`}
-              type="button"
-              aria-label={`${move.attendees.includes(userName) ? 'Joined' : 'Join'} ${move.title}`}
-              onClick={() => onJoinMove(move.id)}
-            >
-              {move.attendees.includes(userName) ? 'Joined' : 'Join'}
-            </button>
-            {move.hostId === userId && (
+            {move.hostId === userId ? (
               <button
                 className="btn btn--ghost"
                 type="button"
+                aria-label={`Cancel ${move.title}`}
                 onClick={() => onCancelMove(move.id)}
               >
+                Cancel Move
+              </button>
+            ) : move.attendees.includes(userName) ? (
+              <button
+                className="btn btn--ghost"
+                type="button"
+                aria-label={`Leave ${move.title}`}
+                onClick={() => onLeaveMove(move.id)}
+              >
                 Leave
+              </button>
+            ) : (
+              <button
+                className="btn btn--primary"
+                type="button"
+                aria-label={`Join ${move.title}`}
+                onClick={() => onJoinMove(move.id)}
+              >
+                Join
               </button>
             )}
           </div>

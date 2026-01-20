@@ -11,10 +11,11 @@ type MoveCardProps = {
   now: number;
   userName: string;
   onJoinMove: (moveId: string) => void;
+  onLeaveMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
 };
 
-export const MoveCard = ({ move, now, userName, onJoinMove, onSelectMove }: MoveCardProps) => {
+export const MoveCard = ({ move, now, userName, onJoinMove, onLeaveMove, onSelectMove }: MoveCardProps) => {
   const isJoined = move.attendees.includes(userName);
   const isHost = move.hostName === userName;
   const statusLabel = getStatusLabel(move.startTime, move.endTime, now);
@@ -81,19 +82,42 @@ export const MoveCard = ({ move, now, userName, onJoinMove, onSelectMove }: Move
               <span className="attendee-count">
                 {move.attendees.length}/{move.maxParticipants}
               </span>
-              <button
-                className={`btn btn--small ${isJoined || isHost ? 'btn--ghost' : 'btn--primary'}`}
-                type="button"
-                aria-label={`${isHost ? 'Hosting' : isJoined ? 'Joined' : 'Join'} ${move.title}`}
-                disabled={isJoinDisabled}
-                aria-disabled={isJoinDisabled}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (!isJoined && !isFull && !isHost) onJoinMove(move.id);
-                }}
-              >
-                {isHost ? 'Hosting' : isJoined ? 'Joined' : 'Join'}
-              </button>
+              {isHost ? (
+                <button
+                  className="btn btn--small btn--ghost"
+                  type="button"
+                  aria-label={`Hosting ${move.title}`}
+                  disabled
+                >
+                  Hosting
+                </button>
+              ) : isJoined ? (
+                <button
+                  className="btn btn--small btn--ghost"
+                  type="button"
+                  aria-label={`Leave ${move.title}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onLeaveMove(move.id);
+                  }}
+                >
+                  Leave
+                </button>
+              ) : (
+                <button
+                  className="btn btn--small btn--primary"
+                  type="button"
+                  aria-label={`Join ${move.title}`}
+                  disabled={isJoinDisabled}
+                  aria-disabled={isJoinDisabled}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (!isFull) onJoinMove(move.id);
+                  }}
+                >
+                  Join
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ type MyMovesScreenProps = {
   hostingMoves: Move[];
   now: number;
   onCancelMove: (moveId: string) => void;
+  onLeaveMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
   onEditMove?: (moveId: string) => void;
 };
@@ -16,6 +17,7 @@ export const MyMovesScreen = ({
   hostingMoves,
   now,
   onCancelMove,
+  onLeaveMove,
   onSelectMove,
   onEditMove,
 }: MyMovesScreenProps) => {
@@ -87,6 +89,14 @@ export const MyMovesScreen = ({
                           onClick={() => onSelectMove(move.id)}
                         >
                           Details
+                        </button>
+                        <button
+                          className="btn btn--small btn--ghost"
+                          type="button"
+                          aria-label={`Leave ${move.title}`}
+                          onClick={() => onLeaveMove(move.id)}
+                        >
+                          Leave
                         </button>
                       </div>
                     </div>

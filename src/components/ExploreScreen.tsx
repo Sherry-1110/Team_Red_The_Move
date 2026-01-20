@@ -8,10 +8,11 @@ type ExploreScreenProps = {
   now: number;
   userName: string;
   onJoinMove: (moveId: string) => void;
+  onLeaveMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
 };
 
-export const ExploreScreen = ({ moves, now, userName, onJoinMove, onSelectMove }: ExploreScreenProps) => {
+export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, onSelectMove }: ExploreScreenProps) => {
   const [selectedAreas, setSelectedAreas] = useState<CampusArea[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -115,6 +116,7 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onSelectMove }
               now={now}
               userName={userName}
               onJoinMove={onJoinMove}
+              onLeaveMove={onLeaveMove}
               onSelectMove={onSelectMove}
             />
           ))
