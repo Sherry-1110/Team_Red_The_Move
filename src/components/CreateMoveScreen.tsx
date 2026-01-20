@@ -1,12 +1,15 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import type { CampusArea, ActivityType } from '../types';
 import { AREA_FILTERS, ACTIVITY_FILTERS } from '../types';
+import { fetchPlaceDetails, fetchPlacePredictions, type PlacePrediction } from '../utilities/geocode';
 
 type FormState = {
   title: string;
   description: string;
   remarks: string;
   location: string;
+  latitude?: number;
+  longitude?: number;
   startTime: string;
   endTime: string;
   maxParticipants: number;
@@ -24,6 +27,8 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
     description: '',
     remarks: '',
     location: '',
+    latitude: undefined,
+    longitude: undefined,
     startTime: '',
     endTime: '',
     maxParticipants: 1,
@@ -31,6 +36,11 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
     activityType: 'Social',
   });
   const [formError, setFormError] = useState('');
+  const [predictionError, setPredictionError] = useState('');
+  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
+  const [isFetchingPredictions, setIsFetchingPredictions] = useState(false);
+  const [isResolvingPlace, setIsResolvingPlace] = useState(false);
+  const [resolvedAddress, setResolvedAddress] = useState('');
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -51,6 +61,10 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
       setFormError('Max participants must be at least 1.');
       return;
     }
+    if (formState.latitude == null || formState.longitude == null) {
+      setFormError('Pick a suggested location so we can place it on the map.');
+      return;
+    }
     const start = new Date(formState.startTime).getTime();
     const end = new Date(formState.endTime).getTime();
     if (Number.isNaN(start) || Number.isNaN(end) || end <= start) {
@@ -64,12 +78,87 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
       description: '',
       remarks: '',
       location: '',
+      latitude: undefined,
+      longitude: undefined,
       startTime: '',
       endTime: '',
       maxParticipants: 1,
       area: 'North',
       activityType: 'Social',
     });
+    setPredictions([]);
+    setPredictionError('');
+    setResolvedAddress('');
+  };
+
+  useEffect(() => {
+    const query = formState.location.trim();
+
+    if (resolvedAddress && resolvedAddress !== query) {
+      setResolvedAddress('');
+      setFormState((prev) => ({ ...prev, latitude: undefined, longitude: undefined }));
+    }
+
+    if (!query) {
+      setPredictionError('');
+      setPredictions([]);
+      setResolvedAddress('');
+      setFormState((prev) => ({ ...prev, latitude: undefined, longitude: undefined }));
+      return () => {};
+    }
+
+    let canceled = false;
+    const debounce = setTimeout(async () => {
+      setIsFetchingPredictions(true);
+      setPredictionError('');
+      try {
+        const results = await fetchPlacePredictions(query);
+        if (canceled) return;
+        setPredictions(results);
+        if (results.length === 0) {
+          setPredictionError('No nearby matches. Try a more specific building name.');
+        }
+      } catch (error) {
+        if (!canceled) {
+          setPredictionError('Could not fetch suggestions. Check your network or API key.');
+          setPredictions([]);
+        }
+      } finally {
+        if (!canceled) {
+          setIsFetchingPredictions(false);
+        }
+      }
+    }, 400);
+
+    return () => {
+      canceled = true;
+      clearTimeout(debounce);
+    };
+  }, [formState.location, resolvedAddress]);
+
+  const handleSelectPrediction = async (prediction: PlacePrediction) => {
+    setIsResolvingPlace(true);
+    setFormError('');
+    setPredictionError('');
+    try {
+      const details = await fetchPlaceDetails(prediction.placeId);
+      if (!details) {
+        setPredictionError('Could not fetch that place. Try another suggestion.');
+        return;
+      }
+      setFormState((prev) => ({
+        ...prev,
+        location: details.formattedAddress || prediction.description,
+        latitude: details.latitude,
+        longitude: details.longitude,
+      }));
+      setResolvedAddress(details.formattedAddress || prediction.description);
+      setPredictions([]);
+    } catch (error) {
+      setPredictionError('Could not fetch that place. Try another suggestion.');
+    } finally {
+      setIsResolvingPlace(false);
+    }
   };
 
   return (
@@ -120,9 +209,31 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
             onChange={(event) =>
               setFormState((prev) => ({ ...prev, location: event.target.value }))
             }
-            placeholder="Tech Lawn, Norris, or downtown"
+            placeholder="Search Evanston buildings or places"
           />
         </label>
+        <div className="suggestions">
+          {!resolvedAddress && isFetchingPredictions && (
+            <p className="helper-text">Searching nearby Evanston spots...</p>
+          )}
+          {!resolvedAddress && predictionError && <p className="form-error">{predictionError}</p>}
+          {!resolvedAddress && predictions.length > 0 && (
+            <ul className="suggestion-list">
+              {predictions.map((prediction) => (
+                <li key={prediction.placeId}>
+                  <button
+                    type="button"
+                    className="suggestion-item"
+                    onClick={() => handleSelectPrediction(prediction)}
+                    disabled={isResolvingPlace}
+                  >
+                    {prediction.description}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <div className="form-row">
           <label>
             <span>Start Time</span>

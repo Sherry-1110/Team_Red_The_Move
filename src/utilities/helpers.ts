@@ -22,6 +22,8 @@ export const firestoreDocToMove = (docData: DocumentData, docId: string): Move =
     description: docData.description ?? '',
     remarks: typeof docData.remarks === 'string' ? docData.remarks : '',
     location: docData.location ?? '',
+    latitude: typeof docData.latitude === 'number' ? docData.latitude : undefined,
+    longitude: typeof docData.longitude === 'number' ? docData.longitude : undefined,
     startTime: docData.startTime ?? new Date().toISOString(),
     endTime: docData.endTime ?? new Date().toISOString(),
     createdAt: docData.createdAt ?? new Date().toISOString(),

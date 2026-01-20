@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Move, CampusArea } from '../types';
 import { AREA_FILTERS } from '../types';
 import { MoveCard } from './MoveCard';
+import { MapView } from './MapView';
 
 type ExploreScreenProps = {
   moves: Move[];
@@ -16,6 +17,7 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
   const [selectedAreas, setSelectedAreas] = useState<CampusArea[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   const filteredMoves = moves.filter((move) => {
     // Filter by selected campus areas
@@ -102,24 +104,66 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
         </div>
       </section>
 
+      <div className="view-toggle">
+        <button
+          type="button"
+          className={`view-button ${viewMode === 'list' ? 'view-button--active' : ''}`}
+          onClick={() => setViewMode('list')}
+          aria-label="Switch to list view"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="8" y1="6" x2="21" y2="6" />
+            <line x1="8" y1="12" x2="21" y2="12" />
+            <line x1="8" y1="18" x2="21" y2="18" />
+            <line x1="3" y1="6" x2="3.01" y2="6" />
+            <line x1="3" y1="12" x2="3.01" y2="12" />
+            <line x1="3" y1="18" x2="3.01" y2="18" />
+          </svg>
+          List
+        </button>
+        <button
+          type="button"
+          className={`view-button ${viewMode === 'map' ? 'view-button--active' : ''}`}
+          onClick={() => setViewMode('map')}
+          aria-label="Switch to map view"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          Map
+        </button>
+      </div>
+
       <section aria-live="polite" className="move-list">
-        {exploreMoves.length === 0 ? (
-          <div className="empty-state">
-            <h3>No moves yet</h3>
-            <p>Try another filter or post a new hangout.</p>
-          </div>
+        {viewMode === 'list' ? (
+          exploreMoves.length === 0 ? (
+            <div className="empty-state">
+              <h3>No moves yet</h3>
+              <p>Try another filter or post a new hangout.</p>
+            </div>
+          ) : (
+            exploreMoves.map((move) => (
+              <MoveCard
+                key={move.id}
+                move={move}
+                now={now}
+                userName={userName}
+                onJoinMove={onJoinMove}
+                onLeaveMove={onLeaveMove}
+                onSelectMove={onSelectMove}
+              />
+            ))
+          )
         ) : (
-          exploreMoves.map((move) => (
-            <MoveCard
-              key={move.id}
-              move={move}
-              now={now}
-              userName={userName}
-              onJoinMove={onJoinMove}
-              onLeaveMove={onLeaveMove}
-              onSelectMove={onSelectMove}
-            />
-          ))
+          exploreMoves.length === 0 ? (
+            <div className="empty-state">
+              <h3>No moves yet</h3>
+              <p>Try another filter or post a new hangout.</p>
+            </div>
+          ) : (
+            <MapView moves={exploreMoves} onSelectMove={onSelectMove} />
+          )
         )}
       </section>
     </>
