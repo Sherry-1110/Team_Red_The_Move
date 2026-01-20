@@ -18,6 +18,7 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [isViewMenuOpen, setIsViewMenuOpen] = useState(false);
 
   const filteredMoves = moves.filter((move) => {
     // Filter by selected campus areas
@@ -28,7 +29,7 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
     // Filter by search query (keyword, location)
     const query = searchQuery.trim().toLowerCase();
     if (!query) return true;
-    const haystack = `${move.title} ${move.description} ${move.location}`.toLowerCase();
+    const haystack = `${move.title} ${move.description} ${move.location || ''} ${move.locationName || ''}`.toLowerCase();
     return haystack.includes(query);
   });
 
@@ -102,38 +103,42 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
             </div>
           )}
         </div>
-      </section>
 
-      <div className="view-toggle">
-        <button
-          type="button"
-          className={`view-button ${viewMode === 'list' ? 'view-button--active' : ''}`}
-          onClick={() => setViewMode('list')}
-          aria-label="Switch to list view"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="8" y1="6" x2="21" y2="6" />
-            <line x1="8" y1="12" x2="21" y2="12" />
-            <line x1="8" y1="18" x2="21" y2="18" />
-            <line x1="3" y1="6" x2="3.01" y2="6" />
-            <line x1="3" y1="12" x2="3.01" y2="12" />
-            <line x1="3" y1="18" x2="3.01" y2="18" />
-          </svg>
-          List
-        </button>
-        <button
-          type="button"
-          className={`view-button ${viewMode === 'map' ? 'view-button--active' : ''}`}
-          onClick={() => setViewMode('map')}
-          aria-label="Switch to map view"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z" />
-            <circle cx="12" cy="10" r="3" />
-          </svg>
-          Map
-        </button>
-      </div>
+        <div className="view-dropdown">
+          <button
+            type="button"
+            className="filter-button"
+            onClick={() => setIsViewMenuOpen((prev) => !prev)}
+            aria-label="Choose view mode"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          {isViewMenuOpen && (
+            <div className="filter-menu view-menu">
+              {[
+                { value: 'list', label: 'List view' },
+                { value: 'map', label: 'Map view' },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`view-option ${viewMode === option.value ? 'view-option--active' : ''}`}
+                  onClick={() => {
+                    setViewMode(option.value as 'list' | 'map');
+                    setIsViewMenuOpen(false);
+                  }}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       <section aria-live="polite" className="move-list">
         {viewMode === 'list' ? (
