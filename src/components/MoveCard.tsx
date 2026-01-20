@@ -19,6 +19,7 @@ export const MoveCard = ({ move, now, userName, onJoinMove, onLeaveMove, onSelec
   const isJoined = move.attendees.includes(userName);
   const isHost = move.hostName === userName;
   const statusLabel = getStatusLabel(move.startTime, move.endTime, now);
+  const displayLocation = move.locationName || move.location;
   const isFull = move.attendees.length >= move.maxParticipants;
   const isJoinDisabled = !isJoined && isFull;
   const activityLabels: Record<ActivityType, string> = {
@@ -67,7 +68,7 @@ export const MoveCard = ({ move, now, userName, onJoinMove, onLeaveMove, onSelec
           </div>
           <p className="move-card__description">{move.description}</p>
           <div className="move-card__meta">
-            <span>{move.location}</span>
+            <span>{displayLocation}</span>
             <span>
               {formatEventDayDate(move.startTime)} {formatEventTimeOnly(move.startTime)} -{' '}
               {formatEventTimeOnly(move.endTime)}

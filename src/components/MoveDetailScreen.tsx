@@ -35,6 +35,8 @@ export const MoveDetailScreen = ({
   };
 
   const statusLabel = getStatusLabel(move.startTime, move.endTime, now);
+  const displayLocation = move.locationName || move.location;
+  const mapsHref = move.locationUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLocation)}`;
 
   return (
     <div className="detail-overlay" role="dialog" aria-modal="true">
@@ -69,7 +71,17 @@ export const MoveDetailScreen = ({
         <div className="detail__meta">
           <div>
             <strong>Location</strong>
-            <span>{move.location}</span>
+            <span>
+              {displayLocation}{' '}
+              <a
+                className="inline-link"
+                href={mapsHref}
+                target="_blank"
+                rel="noreferrer"
+              >
+                (Directions)
+              </a>
+            </span>
           </div>
           <div>
             <strong>Time</strong>

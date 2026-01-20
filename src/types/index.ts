@@ -14,6 +14,10 @@ export type Move = {
   description: string;
   remarks: string;
   location: string;
+  locationName?: string;
+  locationUrl?: string;
+  latitude?: number;
+  longitude?: number;
   startTime: string;
   endTime: string;
   createdAt: string;

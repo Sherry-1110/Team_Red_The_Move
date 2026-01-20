@@ -159,6 +159,10 @@ const App = () => {
     description: string;
     remarks: string;
     location: string;
+    locationName?: string;
+    locationUrl?: string;
+    latitude?: number;
+    longitude?: number;
     startTime: string;
     endTime: string;
     maxParticipants: number;
@@ -171,6 +175,10 @@ const App = () => {
         title: formData.title.trim(),
         description: formData.description.trim(),
         remarks: formData.remarks.trim(),
+        locationName: formData.locationName?.trim() || formData.location.trim(),
+        locationUrl: formData.locationUrl ?? null,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         location: formData.location.trim(),
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),

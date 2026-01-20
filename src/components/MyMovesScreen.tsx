@@ -74,7 +74,7 @@ export const MyMovesScreen = ({
                       </div>
                     </div>
                     <div className="move-card__meta">
-                      <span>{move.location}</span>
+                      <span>{move.locationName || move.location}</span>
                       <span>
                         {formatEventTime(move.startTime)} - {formatEventTime(move.endTime)}
                       </span>
@@ -138,7 +138,7 @@ export const MyMovesScreen = ({
                       </div>
                     </div>
                     <div className="move-card__meta">
-                      <span>{move.location}</span>
+                      <span>{move.locationName || move.location}</span>
                       <span>
                         {formatEventTime(move.startTime)} - {formatEventTime(move.endTime)}
                       </span>

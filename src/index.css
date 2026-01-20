@@ -180,6 +180,7 @@ img {
   gap: 12px;
   align-items: flex-start;
   margin: 24px 0 16px;
+  flex-wrap: wrap;
 }
 
 .search {
@@ -197,6 +198,36 @@ img {
 
 .filter-dropdown {
   position: relative;
+}
+
+.view-dropdown {
+  position: relative;
+}
+
+.view-menu {
+  min-width: 180px;
+  display: grid;
+  gap: 6px;
+}
+
+.view-option {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.view-option:hover {
+  background: var(--sky);
+}
+
+.view-option--active {
+  border-color: var(--purple);
+  background: rgba(78, 42, 132, 0.08);
 }
 
 .filter-button {
@@ -856,5 +887,124 @@ img {
   .login-container {
     padding: 24px;
     gap: 24px;
+  }
+}
+
+/* Map View Styles */
+.view-toggle {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+
+
+.map-container {
+  width: 100%;
+  height: 600px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(31, 26, 43, 0.12);
+  margin-bottom: 20px;
+}
+
+/* Leaflet popup customization */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(31, 26, 43, 0.2);
+}
+
+.popup-content {
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.popup-content h4 {
+  margin: 0 0 6px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.popup-subtitle {
+  margin: 0 0 8px 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.popup-location {
+  margin: 0 0 6px 0;
+  font-size: 0.9rem;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.popup-activity {
+  margin: 0 0 12px 0;
+  font-size: 0.85rem;
+  display: inline-block;
+  background: rgba(78, 42, 132, 0.12);
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: var(--purple);
+}
+
+.popup-button {
+  background: var(--purple);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: background 0.2s ease;
+  width: 100%;
+}
+
+.popup-button:hover {
+  background: var(--plum);
+}
+
+/* Autocomplete suggestions */
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.suggestion-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(31, 26, 43, 0.12);
+  overflow: hidden;
+}
+
+.suggestion-item {
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.suggestion-item:hover,
+.suggestion-item:focus-visible {
+  background: var(--sky);
+}
+
+/* Responsive map height */
+@media (max-width: 768px) {
+  .map-container {
+    height: 400px;
   }
 }
