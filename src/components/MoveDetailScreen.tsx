@@ -39,8 +39,12 @@ export const MoveDetailScreen = ({
   const mapsHref = move.locationUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLocation)}`;
 
   return (
-    <div className="detail-overlay" role="dialog" aria-modal="true">
-      <div className="detail" data-testid="move-detail">
+    <div className="detail-overlay" role="dialog" aria-modal="true" onClick={onClose}>
+      <div
+        className="detail"
+        data-testid="move-detail"
+        onClick={(event) => event.stopPropagation()}
+      >
         <button
           className="detail__close"
           type="button"

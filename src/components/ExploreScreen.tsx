@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { Move, CampusArea } from '../types';
+import { useEffect, useRef, useState } from 'react';
+import type { Move, CampusArea, ActivityType } from '../types';
 import { AREA_FILTERS } from '../types';
 import { MoveCard } from './MoveCard';
 import { MapView } from './MapView';
@@ -17,12 +17,35 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
   const [selectedAreas, setSelectedAreas] = useState<CampusArea[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedMemberRanges, setSelectedMemberRanges] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<ActivityType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'popularity'>('newest');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [isViewMenuOpen, setIsViewMenuOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement | null>(null);
+  const sortRef = useRef<HTMLDivElement | null>(null);
+  const viewRef = useRef<HTMLDivElement | null>(null);
+
+  const areaOptions = AREA_FILTERS.filter((area) => area !== 'All') as CampusArea[];
+  const statusOptions = ['Live Now', 'Upcoming', 'Past'] as const;
+  const categoryOptions: ActivityType[] = ['Sports', 'Social', 'Food', 'Study'];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (filterRef.current && filterRef.current.contains(target)) return;
+      if (sortRef.current && sortRef.current.contains(target)) return;
+      if (viewRef.current && viewRef.current.contains(target)) return;
+      setIsFilterOpen(false);
+      setIsSortOpen(false);
+      setIsViewMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const filteredMoves = moves.filter((move) => {
     // Filter by selected campus areas
@@ -40,6 +63,11 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
       if (!selectedStatuses.includes(status)) {
         return false;
       }
+    }
+
+    // Filter by selected categories
+    if (selectedCategories.length > 0 && !selectedCategories.includes(move.activityType)) {
+      return false;
     }
 
     // Filter by member count ranges
@@ -102,7 +130,7 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
             onChange={(event) => setSearchQuery(event.target.value)}
           />
         </label>
-        <div className="filter-dropdown">
+        <div className="filter-dropdown" ref={filterRef}>
           <button
             type="button"
             className="filter-button"
@@ -125,8 +153,56 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
           {isFilterOpen && (
             <div className="filter-menu">
               <div className="filter-section">
+                <label className="filter-option">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedAreas.length === areaOptions.length &&
+                      selectedStatuses.length === statusOptions.length &&
+                      selectedCategories.length === categoryOptions.length &&
+                      selectedMemberRanges.length === ['1-3', '4-7', '8+'].length
+                    }
+                    onChange={(event) => {
+                      if (event.target.checked) {
+                        setSelectedAreas(areaOptions);
+                        setSelectedStatuses([...statusOptions]);
+                        setSelectedCategories(categoryOptions);
+                        setSelectedMemberRanges(['1-3', '4-7', '8+']);
+                      } else {
+                        setSelectedAreas([]);
+                        setSelectedStatuses([]);
+                        setSelectedCategories([]);
+                        setSelectedMemberRanges([]);
+                      }
+                    }}
+                  />
+                  <span>All</span>
+                </label>
+              </div>
+
+              <div className="filter-section">
+                <h4>Category</h4>
+                {categoryOptions.map((category) => (
+                  <label key={category} className="filter-option">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(category)}
+                      onChange={(event) => {
+                        if (event.target.checked) {
+                          setSelectedCategories((prev) => [...prev, category]);
+                        } else {
+                          setSelectedCategories((prev) => prev.filter((item) => item !== category));
+                        }
+                      }}
+                    />
+                    <span>{category}</span>
+                  </label>
+                ))}
+              </div>
+
+              <div className="filter-section">
                 <h4>Campus Area</h4>
-                {AREA_FILTERS.filter((area) => area !== 'All').map((area) => (
+                {areaOptions.map((area) => (
                   <label key={area} className="filter-option">
                     <input
                       type="checkbox"
@@ -143,10 +219,10 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
                   </label>
                 ))}
               </div>
-              
+
               <div className="filter-section">
                 <h4>Status</h4>
-                {['Live Now', 'Upcoming', 'Past'].map((status) => (
+                {statusOptions.map((status) => (
                   <label key={status} className="filter-option">
                     <input
                       type="checkbox"
@@ -187,7 +263,7 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
           )}
         </div>
 
-        <div className="sort-dropdown">
+        <div className="sort-dropdown" ref={sortRef}>
           <button
             type="button"
             className="filter-button"
@@ -222,7 +298,7 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
           )}
         </div>
 
-        <div className="view-dropdown">
+        <div className="view-dropdown" ref={viewRef}>
           <button
             type="button"
             className="filter-button"
