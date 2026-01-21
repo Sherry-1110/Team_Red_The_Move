@@ -1271,14 +1271,73 @@ img {
     align-items: flex-start;
   }
 
+  .move-card__right {
+    position: static;
+    flex-direction: row;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .move-card__body--stack {
+    padding-right: 0;
+  }
+
   .detail {
     max-height: 100vh;
     border-radius: 16px;
+    padding: 20px 16px 24px;
+  }
+
+  .detail__title-row {
+    flex-wrap: wrap;
+  }
+
+  .detail__title-row h2 {
+    font-size: 1.3rem;
+    flex: 1 1 100%;
+  }
+
+  .detail__title-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .detail__buttons {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .detail__info-card {
+    padding: 12px 14px;
+  }
+
+  .detail__info-row {
+    font-size: 0.9rem;
+  }
+
+  .detail__badges {
+    gap: 8px;
+  }
+
+  .detail__badge {
+    padding: 5px 8px;
+    font-size: 0.85rem;
   }
 
   .login-container {
     padding: 24px;
     gap: 24px;
+  }
+
+  .map-popup-card .move-card__body--stack {
+    padding-right: 0;
+  }
+
+  .map-popup-card .move-card__right {
+    position: static;
+    flex-direction: row;
+    margin-top: 8px;
   }
 }
 
