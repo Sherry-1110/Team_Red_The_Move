@@ -270,11 +270,7 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
             onClick={() => setIsSortOpen(!isSortOpen)}
             aria-label="Sort moves"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="7" y1="12" x2="21" y2="12" />
-              <line x1="12" y1="18" x2="21" y2="18" />
-            </svg>
+            <i className="fa-solid fa-sort"></i>
           </button>
           {isSortOpen && (
             <div className="filter-menu sort-menu">

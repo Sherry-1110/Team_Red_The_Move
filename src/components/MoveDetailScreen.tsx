@@ -124,7 +124,7 @@ export const MoveDetailScreen = ({
                   aria-label={`Cancel ${move.title}`}
                   onClick={() => onCancelMove(move.id)}
                 >
-                  Cancel Move
+                  Leave
                 </button>
               ) : move.attendees.includes(userName) ? (
                 <button
