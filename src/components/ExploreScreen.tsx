@@ -361,7 +361,14 @@ export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, o
               <p>Try another filter or post a new hangout.</p>
             </div>
           ) : (
-            <MapView moves={exploreMoves} onSelectMove={onSelectMove} />
+            <MapView
+              moves={exploreMoves}
+              now={now}
+              userName={userName}
+              onJoinMove={onJoinMove}
+              onLeaveMove={onLeaveMove}
+              onSelectMove={onSelectMove}
+            />
           )
         )}
       </section>

@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Move } from '../types';
 import { getDefaultCoordinatesForArea } from '../utilities/locations';
+import { MoveCard } from './MoveCard';
 
 // Fix for default marker icons in Leaflet
 const DefaultIcon = L.icon({
@@ -18,10 +19,21 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 type MapViewProps = {
   moves: Move[];
+  now: number;
+  userName: string;
+  onJoinMove: (moveId: string) => void;
+  onLeaveMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
 };
 
-export const MapView = ({ moves, onSelectMove }: MapViewProps) => {
+export const MapView = ({
+  moves,
+  now,
+  userName,
+  onJoinMove,
+  onLeaveMove,
+  onSelectMove,
+}: MapViewProps) => {
   // Northwestern campus center coordinates
   const mapCenter = [42.0500, -87.6750] as [number, number];
   const mapZoom = 14;
@@ -37,8 +49,6 @@ export const MapView = ({ moves, onSelectMove }: MapViewProps) => {
           // Use provided coordinates or calculate from area
           let lat = move.latitude;
           let lng = move.longitude;
-          const displayLocation = move.locationName || move.location;
-
           if (lat === undefined || lng === undefined) {
             const defaultCoords = getDefaultCoordinatesForArea(move.area);
             lat = defaultCoords.latitude;
@@ -48,12 +58,15 @@ export const MapView = ({ moves, onSelectMove }: MapViewProps) => {
           return (
             <Marker key={move.id} position={[lat, lng]}>
               <Popup>
-                <div className="popup-content" onClick={() => onSelectMove(move.id)}>
-                  <h4>{move.title}</h4>
-                  <p className="popup-subtitle">by {move.hostName}</p>
-                  <p className="popup-location">{displayLocation}</p>
-                  <p className="popup-activity">{move.activityType}</p>
-                  <button className="popup-button">View Details</button>
+                <div className="map-popup-card">
+                  <MoveCard
+                    move={move}
+                    now={now}
+                    userName={userName}
+                    onJoinMove={onJoinMove}
+                    onLeaveMove={onLeaveMove}
+                    onSelectMove={onSelectMove}
+                  />
                 </div>
               </Popup>
             </Marker>

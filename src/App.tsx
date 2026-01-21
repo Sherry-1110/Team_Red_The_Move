@@ -91,9 +91,34 @@ const App = () => {
     if (move.attendees.length >= move.maxParticipants) return;
 
     try {
+      const trimmedPrompt = move.signupPrompt?.trim();
+      const existingResponses = Array.isArray(move.signupResponses) ? move.signupResponses : [];
+      let nextSignupResponses = existingResponses;
+
+      if (trimmedPrompt) {
+        if (move.signupPromptRequiresResponse) {
+          const response = window.prompt(trimmedPrompt);
+          if (!response || !response.trim()) {
+            return;
+          }
+          nextSignupResponses = [
+            ...existingResponses,
+            {
+              id: createId(),
+              attendee: user.name,
+              response: response.trim(),
+              createdAt: new Date().toISOString(),
+            },
+          ];
+        } else {
+          window.alert(trimmedPrompt);
+        }
+      }
+
       const moveRef = doc(db, 'moves', moveId);
       await updateDoc(moveRef, {
         attendees: [...move.attendees, user.name],
+        signupResponses: nextSignupResponses,
       });
     } catch (error) {
       console.error('Error joining move:', error);
@@ -157,7 +182,8 @@ const App = () => {
   const handleCreateMove = async (formData: {
     title: string;
     description: string;
-    remarks: string;
+    signupPrompt: string;
+    signupPromptRequiresResponse: boolean;
     location: string;
     locationName?: string;
     locationUrl?: string;
@@ -165,16 +191,23 @@ const App = () => {
     longitude?: number;
     startTime: string;
     endTime: string;
-    maxParticipants: number;
+    maxParticipants: number | '';
     area: string;
     activityType: string;
   }) => {
     try {
       const movesCollection = collection(db, 'moves');
+      const normalizedMaxParticipants =
+        typeof formData.maxParticipants === 'number' && Number.isFinite(formData.maxParticipants)
+          ? formData.maxParticipants
+          : 1;
       await addDoc(movesCollection, {
         title: formData.title.trim(),
         description: formData.description.trim(),
-        remarks: formData.remarks.trim(),
+        remarks: '',
+        signupPrompt: formData.signupPrompt.trim(),
+        signupPromptRequiresResponse: formData.signupPromptRequiresResponse,
+        signupResponses: [],
         locationName: formData.locationName?.trim() || formData.location.trim(),
         locationUrl: formData.locationUrl ?? null,
         latitude: formData.latitude,
@@ -188,7 +221,7 @@ const App = () => {
         hostId: user.id,
         hostName: user.name,
         attendees: [user.name],
-        maxParticipants: formData.maxParticipants,
+        maxParticipants: normalizedMaxParticipants,
         comments: [],
       });
       setActiveTab('explore');

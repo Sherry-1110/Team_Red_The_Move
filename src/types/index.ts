@@ -8,11 +8,21 @@ export type Comment = {
   createdAt: string;
 };
 
+export type SignupResponse = {
+  id: string;
+  attendee: string;
+  response: string;
+  createdAt: string;
+};
+
 export type Move = {
   id: string;
   title: string;
   description: string;
   remarks: string;
+  signupPrompt: string;
+  signupPromptRequiresResponse: boolean;
+  signupResponses: SignupResponse[];
   location: string;
   locationName?: string;
   locationUrl?: string;

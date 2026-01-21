@@ -1,6 +1,17 @@
-import { useState } from 'react';
-import type { Move } from '../types';
-import { formatTimeAgo, formatEventTime, getStatusLabel } from '../utilities/helpers';
+import { useMemo, useState } from 'react';
+import type { Move, ActivityType, CampusArea } from '../types';
+import { formatTimeAgo, formatEventTime } from '../utilities/helpers';
+import {
+  BookOpen,
+  CalendarClock,
+  MapPin,
+  Plus,
+  Star,
+  UserRound,
+  Users,
+  UtensilsCrossed,
+} from 'lucide-react';
+import type { ReactElement } from 'react';
 
 type MoveDetailScreenProps = {
   move: Move;
@@ -26,6 +37,8 @@ export const MoveDetailScreen = ({
   onClose,
 }: MoveDetailScreenProps) => {
   const [commentDraft, setCommentDraft] = useState('');
+  const [isCommentFormOpen, setIsCommentFormOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const handleAddComment = () => {
     const trimmed = commentDraft.trim();
@@ -34,9 +47,43 @@ export const MoveDetailScreen = ({
     setCommentDraft('');
   };
 
-  const statusLabel = getStatusLabel(move.startTime, move.endTime, now);
   const displayLocation = move.locationName || move.location;
   const mapsHref = move.locationUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLocation)}`;
+  const maxSlots = Math.max(move.maxParticipants, move.attendees.length);
+  const attendeeInitials = useMemo(
+    () =>
+      move.attendees.map((attendee) =>
+        attendee
+          .split(' ')
+          .filter(Boolean)
+          .map((part) => part[0])
+          .slice(0, 2)
+          .join('')
+          .toUpperCase(),
+      ),
+    [move.attendees],
+  );
+  const activityIcons: Record<ActivityType, ReactElement> = {
+    Food: <UtensilsCrossed size={14} />,
+    Study: <BookOpen size={14} />,
+    Sports: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 3v18" />
+        <path d="M3 12h18" />
+        <path d="M6.2 6.2c3.6 3.6 8 3.6 11.6 0" />
+        <path d="M6.2 17.8c3.6-3.6 8-3.6 11.6 0" />
+      </svg>
+    ),
+    Social: <Users size={14} />,
+    Other: <Users size={14} />,
+  };
+  const areaIcons: Record<CampusArea, ReactElement> = {
+    North: <MapPin size={14} />,
+    South: <MapPin size={14} />,
+    Downtown: <MapPin size={14} />,
+    Other: <MapPin size={14} />,
+  };
 
   return (
     <div className="detail-overlay" role="dialog" aria-modal="true" onClick={onClose}>
@@ -56,99 +103,150 @@ export const MoveDetailScreen = ({
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
-        <div className="detail__header">
-          <div>
-            <p className="eyebrow">{move.area} Campus</p>
-            <h2>{move.title}</h2>
-            <p className="detail__subtitle">Hosted by {move.hostName}</p>
-          </div>
-          <div className="detail__status">
-            <span
-              className={`status-badge ${statusLabel === 'Past' ? 'status-badge--past' : ''}`}
+        <div className="detail__title-row">
+          <h2>{move.title}</h2>
+          <div className="detail__title-actions">
+            <button
+              className="save-toggle-btn"
+              type="button"
+              aria-label={`${isSaved ? 'Unsave' : 'Save'} ${move.title}`}
+              aria-pressed={isSaved}
+              onClick={() => setIsSaved((prev) => !prev)}
             >
-              {statusLabel}
-            </span>
-            <span className="detail__time">{formatTimeAgo(move.createdAt, now)}</span>
+              <Star size={16} strokeWidth={2} fill={isSaved ? 'currentColor' : 'none'} />
+            </button>
+            <div className="detail__buttons">
+              {move.hostId === userId ? (
+                <button
+                  className="btn btn--ghost"
+                  type="button"
+                  aria-label={`Cancel ${move.title}`}
+                  onClick={() => onCancelMove(move.id)}
+                >
+                  Cancel Move
+                </button>
+              ) : move.attendees.includes(userName) ? (
+                <button
+                  className="btn btn--ghost"
+                  type="button"
+                  aria-label={`Leave ${move.title}`}
+                  onClick={() => onLeaveMove(move.id)}
+                >
+                  Leave
+                </button>
+              ) : (
+                <button
+                  className="btn btn--primary"
+                  type="button"
+                  aria-label={`Join ${move.title}`}
+                  onClick={() => onJoinMove(move.id)}
+                >
+                  Join
+                </button>
+              )}
+            </div>
           </div>
         </div>
-        <p className="detail__description">{move.description}</p>
-        <div className="detail__meta">
-          <div>
-            <strong>Location</strong>
-            <span>
-              {displayLocation}{' '}
-              <a
-                className="inline-link"
-                href={mapsHref}
-                target="_blank"
-                rel="noreferrer"
-              >
-                (Directions)
-              </a>
-            </span>
-          </div>
-          <div>
-            <strong>Time</strong>
-            <span>
-              {formatEventTime(move.startTime)} - {formatEventTime(move.endTime)}
-            </span>
-          </div>
-          <div>
-            <strong>Activity</strong>
-            <span>{move.activityType}</span>
-          </div>
-        </div>
-        <div className="detail__actions">
-          <span className="attendee-count" data-testid="attendee-count">
-            {move.attendees.length} going
+        <div className="detail__badges">
+          <span className="detail__badge">
+            {areaIcons[move.area]}
+            {move.area}
           </span>
-          <div className="detail__buttons">
-            {move.hostId === userId ? (
-              <button
-                className="btn btn--ghost"
-                type="button"
-                aria-label={`Cancel ${move.title}`}
-                onClick={() => onCancelMove(move.id)}
-              >
-                Cancel Move
-              </button>
-            ) : move.attendees.includes(userName) ? (
-              <button
-                className="btn btn--ghost"
-                type="button"
-                aria-label={`Leave ${move.title}`}
-                onClick={() => onLeaveMove(move.id)}
-              >
-                Leave
-              </button>
-            ) : (
-              <button
-                className="btn btn--primary"
-                type="button"
-                aria-label={`Join ${move.title}`}
-                onClick={() => onJoinMove(move.id)}
-              >
-                Join
-              </button>
-            )}
+          <span className="detail__badge">
+            {activityIcons[move.activityType]}
+            {move.activityType}
+          </span>
+        </div>
+        <div className="detail__info-card">
+          <p className="detail__description">{move.description}</p>
+          <div className="detail__info">
+            <div className="detail__info-row">
+              <MapPin size={14} />
+              <span>
+                {displayLocation}{' '}
+                <a className="inline-link" href={mapsHref} target="_blank" rel="noreferrer">
+                  (Directions)
+                </a>
+              </span>
+            </div>
+            <div className="detail__info-row">
+              <CalendarClock size={14} />
+              <span>
+                {formatEventTime(move.startTime)} - {formatEventTime(move.endTime)}
+              </span>
+            </div>
+            <div className="detail__info-row">
+              <UserRound size={14} />
+              <span>Hosted by {move.hostName}</span>
+            </div>
           </div>
         </div>
 
         <div className="detail__attendees">
-          <h3>Attendees</h3>
+          <div className="detail__attendees-header">
+            <h3>Attendees</h3>
+            <span className="attendee-count attendee-count--with-icon" data-testid="attendee-count">
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                <circle cx="12" cy="7" r="4" fill="currentColor" />
+                <path d="M4 21c0-4 4-6 8-6s8 2 8 6" fill="currentColor" />
+              </svg>
+              {move.attendees.length}/{move.maxParticipants}
+            </span>
+          </div>
           {move.attendees.includes(userName) ? (
-            <ul>
-              {move.attendees.map((attendee) => (
-                <li key={attendee}>{attendee}</li>
-              ))}
-            </ul>
+            <div className="detail__avatars">
+              {Array.from({ length: maxSlots }).map((_, index) => {
+                const initials = attendeeInitials[index];
+                return initials ? (
+                  <span
+                    key={`${initials}-${index}`}
+                    className="detail__avatar detail__avatar--filled"
+                  >
+                    {initials}
+                  </span>
+                ) : (
+                  <span key={`empty-${index}`} className="detail__avatar detail__avatar--empty">
+                    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                      <circle cx="12" cy="8" r="4" fill="currentColor" />
+                      <path d="M4 21c0-4 4-6 8-6s8 2 8 6" fill="currentColor" />
+                    </svg>
+                  </span>
+                );
+              })}
+            </div>
           ) : (
             <p className="muted">Join to see the attendee list.</p>
           )}
         </div>
 
         <div className="detail__comments">
-          <h3>Comments</h3>
+          <div className="detail__comments-header">
+            <h3>Comments</h3>
+            <button
+              type="button"
+              className="detail__comment-toggle"
+              aria-label={isCommentFormOpen ? 'Close comment form' : 'Add a comment'}
+              onClick={() => setIsCommentFormOpen((prev) => !prev)}
+            >
+              <Plus size={18} />
+            </button>
+          </div>
+          {isCommentFormOpen && (
+            <div className="comment-form">
+              <label>
+                <span className="sr-only">Add a comment</span>
+                <input
+                  type="text"
+                  placeholder="Coordinate details here"
+                  value={commentDraft}
+                  onChange={(event) => setCommentDraft(event.target.value)}
+                />
+              </label>
+              <button className="btn btn--primary" type="button" onClick={handleAddComment}>
+                Send
+              </button>
+            </div>
+          )}
           <div className="comments">
             {move.comments.length === 0 ? (
               <p className="muted">No comments yet. Start the plan.</p>
@@ -163,20 +261,6 @@ export const MoveDetailScreen = ({
                 </div>
               ))
             )}
-          </div>
-          <div className="comment-form">
-            <label>
-              <span className="sr-only">Add a comment</span>
-              <input
-                type="text"
-                placeholder="Coordinate details here"
-                value={commentDraft}
-                onChange={(event) => setCommentDraft(event.target.value)}
-              />
-            </label>
-            <button className="btn btn--primary" type="button" onClick={handleAddComment}>
-              Send
-            </button>
           </div>
         </div>
       </div>
