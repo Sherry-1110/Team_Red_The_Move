@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import type { Move } from '../types';
 import { formatTimeAgo, formatEventTime, getStatusLabel } from '../utilities/helpers';
+import { useSavedMoves } from '../contexts/SavedMovesContext';
+import { Star } from 'lucide-react';
 
 type MyMovesScreenProps = {
+  allMoves: Move[];
   joinedMoves: Move[];
   hostingMoves: Move[];
   now: number;
@@ -13,6 +16,7 @@ type MyMovesScreenProps = {
 };
 
 export const MyMovesScreen = ({
+  allMoves,
   joinedMoves,
   hostingMoves,
   now,
@@ -21,7 +25,11 @@ export const MyMovesScreen = ({
   onSelectMove,
   onEditMove,
 }: MyMovesScreenProps) => {
-  const [myMovesTab, setMyMovesTab] = useState<'joined' | 'hosting'>('joined');
+  const [myMovesTab, setMyMovesTab] = useState<'joined' | 'hosting' | 'saved'>('joined');
+  const { unsaveMove, isSaved } = useSavedMoves();
+
+  // Filter all moves to get only saved ones from the full collection
+  const savedMoves = allMoves.filter((move) => isSaved(move.id));
 
   return (
     <section className="my-moves">
@@ -39,6 +47,13 @@ export const MyMovesScreen = ({
           onClick={() => setMyMovesTab('hosting')}
         >
           Hosting
+        </button>
+        <button
+          type="button"
+          className={`sub-tab ${myMovesTab === 'saved' ? 'sub-tab--active' : ''}`}
+          onClick={() => setMyMovesTab('saved')}
+        >
+          Saved
         </button>
       </div>
       <div className="move-list">
@@ -189,7 +204,77 @@ export const MyMovesScreen = ({
             )}
           </>
         )}
+        {myMovesTab === 'saved' && (
+          <>
+            {savedMoves.length === 0 ? (
+              <div className="empty-state">
+                <h3>No saved moves</h3>
+                <p>Save moves from Explore to see them here.</p>
+              </div>
+            ) : (
+              savedMoves.map((move) => (
+                <article key={move.id} className="move-card move-card--compact">
+                  <div className="move-card__content">
+                    <div className="move-card__header">
+                      <div>
+                        <h3>{move.title}</h3>
+                        <p className="move-card__subtitle">Hosted by {move.hostName}</p>
+                      </div>
+                      <div className="move-card__status">
+                        <span
+                          className={`status-badge ${
+                            getStatusLabel(move.startTime, move.endTime, now) === 'Past'
+                              ? 'status-badge--past'
+                              : ''
+                          }`}
+                        >
+                          {getStatusLabel(move.startTime, move.endTime, now)}
+                        </span>
+                        <span className="move-card__time">
+                          {formatTimeAgo(move.createdAt, now)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="move-card__meta">
+                      <span>{move.locationName || move.location}</span>
+                      <span>
+                        {formatEventTime(move.startTime)} - {formatEventTime(move.endTime)}
+                      </span>
+                      <span>{move.activityType}</span>
+                    </div>
+                    <div className="move-card__footer">
+                      <span className="attendee-count">{move.attendees.length} going</span>
+                      <div className="move-card__actions">
+                        <button
+                          className="btn btn--small"
+                          type="button"
+                          onClick={() => onSelectMove(move.id)}
+                        >
+                          Details
+                        </button>
+                        <button
+                          className="save-toggle-btn"
+                          type="button"
+                          aria-label={`Unsave ${move.title}`}
+                          aria-pressed="true"
+                          onClick={() => void unsaveMove(move.id)}
+                          title="Remove from saved"
+                        >
+                          <Star
+                            size={16}
+                            strokeWidth={2}
+                            fill="currentColor"
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))
+            )}
+          </>
+        )}
       </div>
     </section>
-  );
-};
+  )};
+

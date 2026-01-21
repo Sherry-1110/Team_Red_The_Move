@@ -2,7 +2,7 @@ import type { Move, ActivityType, CampusArea } from '../types';
 import { formatTimeAgo, getStatusLabel } from '../utilities/helpers';
 import { BookOpen, CalendarClock, MapPin, Star, UserRound, Users, UtensilsCrossed } from 'lucide-react';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useSavedMoves } from '../contexts/SavedMovesContext';
 
 type MoveCardProps = {
   move: Move;
@@ -20,7 +20,7 @@ export const MoveCard = ({ move, now, userName, onJoinMove, onLeaveMove, onSelec
   const displayLocation = move.locationName || move.location;
   const isFull = move.attendees.length >= move.maxParticipants;
   const isJoinDisabled = !isJoined && isFull;
-  const [isSaved, setIsSaved] = useState(false);
+  const { isSaved, toggleSave } = useSavedMoves();
   const activityIcons: Record<ActivityType, ReactElement> = {
     Food: <UtensilsCrossed size={14} />,
     Study: <BookOpen size={14} />,
@@ -129,17 +129,17 @@ export const MoveCard = ({ move, now, userName, onJoinMove, onLeaveMove, onSelec
             <button
               className="save-toggle-btn"
               type="button"
-              aria-label={`${isSaved ? 'Unsave' : 'Save'} ${move.title}`}
-              aria-pressed={isSaved}
+              aria-label={`${isSaved(move.id) ? 'Unsave' : 'Save'} ${move.title}`}
+              aria-pressed={isSaved(move.id)}
               onClick={(event) => {
                 event.stopPropagation();
-                setIsSaved((prev) => !prev);
+                void toggleSave(move.id);
               }}
             >
               <Star
                 size={16}
                 strokeWidth={2}
-                fill={isSaved ? 'currentColor' : 'none'}
+                fill={isSaved(move.id) ? 'currentColor' : 'none'}
               />
             </button>
             {isHost ? (

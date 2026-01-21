@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Move, ActivityType, CampusArea } from '../types';
 import { formatTimeAgo, formatEventTime } from '../utilities/helpers';
+import { useSavedMoves } from '../contexts/SavedMovesContext';
 import {
   BookOpen,
   CalendarClock,
@@ -38,7 +39,7 @@ export const MoveDetailScreen = ({
 }: MoveDetailScreenProps) => {
   const [commentDraft, setCommentDraft] = useState('');
   const [isCommentFormOpen, setIsCommentFormOpen] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const { isSaved, toggleSave } = useSavedMoves();
 
   const handleAddComment = () => {
     const trimmed = commentDraft.trim();
@@ -109,11 +110,11 @@ export const MoveDetailScreen = ({
             <button
               className="save-toggle-btn"
               type="button"
-              aria-label={`${isSaved ? 'Unsave' : 'Save'} ${move.title}`}
-              aria-pressed={isSaved}
-              onClick={() => setIsSaved((prev) => !prev)}
+              aria-label={`${isSaved(move.id) ? 'Unsave' : 'Save'} ${move.title}`}
+              aria-pressed={isSaved(move.id)}
+              onClick={() => void toggleSave(move.id)}
             >
-              <Star size={16} strokeWidth={2} fill={isSaved ? 'currentColor' : 'none'} />
+              <Star size={16} strokeWidth={2} fill={isSaved(move.id) ? 'currentColor' : 'none'} />
             </button>
             <div className="detail__buttons">
               {move.hostId === userId ? (

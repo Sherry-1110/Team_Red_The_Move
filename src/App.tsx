@@ -324,6 +324,7 @@ const App = () => {
 
           {activeTab === 'profile' && (
             <MyMovesScreen
+              allMoves={moves}
               joinedMoves={joinedMoves}
               hostingMoves={hostingMoves}
               now={now}

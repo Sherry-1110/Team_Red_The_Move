@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist",
+    "public": "firebase deploy --only hosting",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -14,7 +14,3 @@
     ]
   }
 }
-
-
-
-
