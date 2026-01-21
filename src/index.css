@@ -263,6 +263,53 @@ img {
   z-index: 10;
 }
 
+.filter-section {
+  margin-bottom: 16px;
+}
+
+.filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.filter-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sort-dropdown {
+  position: relative;
+}
+
+.sort-menu {
+  min-width: 160px;
+  display: grid;
+  gap: 6px;
+}
+
+.sort-option {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.sort-option:hover {
+  background: var(--sky);
+}
+
+.sort-option--active {
+  border-color: var(--purple);
+  background: rgba(78, 42, 132, 0.08);
+}
+
 .filter-option {
   display: flex;
   align-items: center;
