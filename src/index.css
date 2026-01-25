@@ -71,7 +71,7 @@ img {
 .app-shell {
   min-height: 100vh;
   position: relative;
-  padding-bottom: 5.5rem;
+  padding-bottom: 2rem;
   overflow-x: hidden;
 }
 
@@ -725,6 +725,38 @@ img {
   box-shadow: var(--shadow);
 }
 
+.modal-panel {
+  width: min(720px, calc(100vw - 40px));
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.panel-heading {
+  position: relative;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(31, 26, 43, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.modal-close-btn:hover {
+  background: rgba(31, 26, 43, 0.15);
+}
+
 .panel-heading h2 {
   font-weight: 700;
   margin: 0;
@@ -998,6 +1030,54 @@ img {
   z-index: 10;
   width: min(calc(100% - 40px), 720px);
   max-width: 720px;
+}
+
+/* Floating Create Button */
+.floating-create-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--purple);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 32px rgba(78, 42, 132, 0.4);
+  transition: all 0.3s ease;
+  z-index: 10;
+  border: none;
+  cursor: pointer;
+}
+
+.floating-create-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 16px 40px rgba(78, 42, 132, 0.5);
+  background: var(--plum);
+}
+
+.floating-create-btn:active {
+  transform: scale(0.95);
+}
+
+.floating-create-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 26, 43, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 30;
+  backdrop-filter: blur(4px);
 }
 
 .nav-item {
