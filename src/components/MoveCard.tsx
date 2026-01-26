@@ -1,5 +1,5 @@
 import type { Move, ActivityType, CampusArea } from '../types';
-import { formatTimeAgo, getStatusLabel, calculateDistance, formatDistance } from '../utilities/helpers';
+import { getStatusLabel, calculateDistance, formatDistance } from '../utilities/helpers';
 import { BookOpen, CalendarClock, MapPin, Star, UserRound, Users, UtensilsCrossed } from 'lucide-react';
 import type { ReactElement } from 'react';
 import { useSavedMoves } from '../contexts/SavedMovesContext';
@@ -142,7 +142,6 @@ export const MoveCard = ({
             >
               {statusLabel}
             </span>
-            <span className="move-card__time">{formatTimeAgo(move.createdAt, now)}</span>
           </div>
           <div className="move-card__actions move-card__actions--right">
             <span className="attendee-count attendee-count--with-icon">
