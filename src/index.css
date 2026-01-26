@@ -651,11 +651,32 @@ img {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
 }
 
 .status-badge--past {
   background: rgba(31, 26, 43, 0.08);
   color: var(--muted);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--muted);
+  display: inline-block;
+}
+
+.status-dot--live-now {
+  background: #1f9d55;
+}
+
+.status-dot--past {
+  background: #d64545;
+}
+
+.status-dot--upcoming {
+  background: #f0b429;
 }
 
 .move-card__description {
@@ -1007,6 +1028,28 @@ img {
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--plum);
+}
+
+.my-upcoming-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+}
+
+.my-upcoming-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.my-upcoming-arrow {
+  font-style: italic;
+  font-weight: 700;
 }
 
 .pill-count {

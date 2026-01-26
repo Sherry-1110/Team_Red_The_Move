@@ -72,16 +72,23 @@ const App = () => {
 
   const joinedMoves = useMemo(() => {
     return sortByNewest(
-      moves.filter(
-        (move) => move.attendees.includes(user.name) && move.hostId !== user.id,
-      ),
+      moves.filter((move) => {
+        const isJoined = move.attendees.includes(user.name);
+        const isHost = move.hostId === user.id;
+        if (!isJoined || isHost) return false;
+        return new Date(move.endTime).getTime() >= now;
+      }),
     );
-  }, [moves, user.id, user.name]);
+  }, [moves, user.id, user.name, now]);
 
-  const hostingMoves = useMemo(
-    () => sortByNewest(moves.filter((move) => move.hostId === user.id)),
-    [moves, user.id],
-  );
+  const hostingMoves = useMemo(() => {
+    return sortByNewest(
+      moves.filter((move) => {
+        if (move.hostId !== user.id) return false;
+        return new Date(move.endTime).getTime() >= now;
+      }),
+    );
+  }, [moves, user.id, now]);
 
   const handleJoinMove = async (moveId: string) => {
     const move = moves.find((m) => m.id === moveId);

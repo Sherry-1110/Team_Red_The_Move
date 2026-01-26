@@ -52,6 +52,7 @@ export const MoveDetailScreen = ({
 
   const displayLocation = move.locationName || move.location;
   const mapsHref = move.locationUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLocation)}`;
+  const isPast = new Date(move.endTime).getTime() < now;
   const attendeeInitials = useMemo(
     () =>
       move.attendees.map((attendee) =>
@@ -118,7 +119,13 @@ export const MoveDetailScreen = ({
               type="button"
               aria-label={`${isSaved(move.id) ? 'Unsave' : 'Save'} ${move.title}`}
               aria-pressed={isSaved(move.id)}
-              onClick={() => void toggleSave(move.id)}
+              disabled={isPast}
+              aria-disabled={isPast}
+              onClick={() => {
+                if (!isPast) {
+                  void toggleSave(move.id);
+                }
+              }}
             >
               <Star size={16} strokeWidth={2} fill={isSaved(move.id) ? 'currentColor' : 'none'} />
             </button>
@@ -146,7 +153,11 @@ export const MoveDetailScreen = ({
                   className="btn btn--primary"
                   type="button"
                   aria-label={`Join ${move.title}`}
-                  onClick={() => onJoinMove(move.id)}
+                  onClick={() => {
+                    if (!isPast) onJoinMove(move.id);
+                  }}
+                  disabled={isPast}
+                  aria-disabled={isPast}
                 >
                   Join
                 </button>
@@ -222,31 +233,37 @@ export const MoveDetailScreen = ({
         </div>
 
         <div className="detail__comments">
-          <div className="detail__comment-input-container">
-            <input
-              type="text"
-              className="detail__comment-input"
-              placeholder="Comment here..."
-              value={commentDraft}
-              onChange={(event) => setCommentDraft(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  handleAddComment();
-                }
-              }}
-            />
-            <button
-              type="button"
-              className="detail__comment-send"
-              onClick={handleAddComment}
-              disabled={!commentDraft.trim()}
-            >
-              <Plus size={20} />
-            </button>
-          </div>
+          {new Date(move.endTime).getTime() < now ? (
+            <p className="muted">Comments are closed for past events.</p>
+          ) : (
+            <div className="detail__comment-input-container">
+              <input
+                type="text"
+                className="detail__comment-input"
+                placeholder="Comment here..."
+                value={commentDraft}
+                onChange={(event) => setCommentDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    handleAddComment();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="detail__comment-send"
+                onClick={handleAddComment}
+                disabled={!commentDraft.trim()}
+              >
+                <Plus size={20} />
+              </button>
+            </div>
+          )}
           <div className="comments">
             {move.comments.length === 0 ? (
-              <p className="muted">No comments yet. Start the plan.</p>
+              new Date(move.endTime).getTime() < now ? null : (
+                <p className="muted">No comments yet. Start the plan.</p>
+              )
             ) : (
               move.comments.map((comment) => (
                 <div key={comment.id} className="comment">

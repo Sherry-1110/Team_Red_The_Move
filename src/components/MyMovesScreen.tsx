@@ -29,7 +29,10 @@ export const MyMovesScreen = ({
   const { unsaveMove, isSaved } = useSavedMoves();
 
   // Filter all moves to get only saved ones from the full collection
-  const savedMoves = allMoves.filter((move) => isSaved(move.id));
+  const savedMoves = allMoves.filter((move) => {
+    if (!isSaved(move.id)) return false;
+    return new Date(move.endTime).getTime() >= now;
+  });
 
   return (
     <section className="my-moves">
@@ -283,4 +286,3 @@ export const MyMovesScreen = ({
       </div>
     </section>
   )};
-

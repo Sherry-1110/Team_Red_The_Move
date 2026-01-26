@@ -1,5 +1,5 @@
 import type { Move, ActivityType, CampusArea } from '../types';
-import { formatTimeAgo, getStatusLabel, calculateDistance, formatDistance } from '../utilities/helpers';
+import { getStatusLabel, calculateDistance, formatDistance } from '../utilities/helpers';
 import { BookOpen, CalendarClock, MapPin, Star, UserRound, Users, UtensilsCrossed } from 'lucide-react';
 import type { ReactElement } from 'react';
 import { useSavedMoves } from '../contexts/SavedMovesContext';
@@ -140,9 +140,14 @@ export const MoveCard = ({
             <span
               className={`status-badge ${statusLabel === 'Past' ? 'status-badge--past' : ''}`}
             >
+              <span
+                className={`status-dot status-dot--${statusLabel
+                  .toLowerCase()
+                  .replace(' ', '-')}`}
+                aria-hidden="true"
+              />
               {statusLabel}
             </span>
-            <span className="move-card__time">{formatTimeAgo(move.createdAt, now)}</span>
           </div>
           <div className="move-card__actions move-card__actions--right">
             <span className="attendee-count attendee-count--with-icon">
@@ -157,9 +162,13 @@ export const MoveCard = ({
               type="button"
               aria-label={`${isSaved(move.id) ? 'Unsave' : 'Save'} ${move.title}`}
               aria-pressed={isSaved(move.id)}
+              disabled={isPast}
+              aria-disabled={isPast}
               onClick={(event) => {
                 event.stopPropagation();
-                void toggleSave(move.id);
+                if (!isPast) {
+                  void toggleSave(move.id);
+                }
               }}
             >
               <Star

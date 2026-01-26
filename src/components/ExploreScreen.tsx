@@ -34,7 +34,7 @@ export const ExploreScreen = ({
   onEditMove,
 }: ExploreScreenProps) => {
   const [selectedAreas, setSelectedAreas] = useState<CampusArea[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(['Upcoming', 'Live Now']);
   const [selectedCategories, setSelectedCategories] = useState<ActivityType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -144,18 +144,8 @@ export const ExploreScreen = ({
     return 0;
   });
 
-  // Calculate upcoming and live moves that user is hosting or joined
-  const myActiveMoves = moves
-    .filter((move) => {
-      const isHostingOrJoined = move.hostName === userName || move.attendees.includes(userName);
-      if (!isHostingOrJoined) return false;
-      
-      const end = new Date(move.endTime).getTime();
-      const isLiveOrUpcoming = now < end;
-      
-      return isLiveOrUpcoming;
-    })
-    .sort((a, b) => {
+  const sortActiveMoves = (list: Move[]) => {
+    return [...list].sort((a, b) => {
       const getStatusRank = (move: Move) => {
         const start = new Date(move.startTime).getTime();
         const end = new Date(move.endTime).getTime();
@@ -163,16 +153,33 @@ export const ExploreScreen = ({
         if (now < start) return 1; // Upcoming
         return 2;
       };
-      
+
       const rankA = getStatusRank(a);
       const rankB = getStatusRank(b);
       if (rankA !== rankB) return rankA - rankB;
-      
+
       // Sort by start time (soonest first)
       return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
     });
+  };
 
-  const myActiveMovesCount = myActiveMoves.length;
+  const joinedActiveMoves = sortActiveMoves(
+    moves.filter((move) => {
+      const isJoined = move.attendees.includes(userName);
+      const isHost = move.hostName === userName;
+      if (!isJoined || isHost) return false;
+      return now < new Date(move.endTime).getTime();
+    }),
+  );
+
+  const hostingActiveMoves = sortActiveMoves(
+    moves.filter((move) => {
+      if (move.hostName !== userName) return false;
+      return now < new Date(move.endTime).getTime();
+    }),
+  );
+
+  const myActiveMovesCount = joinedActiveMoves.length + hostingActiveMoves.length;
 
   return (
     <>
@@ -441,34 +448,64 @@ export const ExploreScreen = ({
               onClick={() => setShowMyUpcoming((prev) => !prev)}
             >
               <span className="my-upcoming-text">
-                You have <span className="my-upcoming-count">{myActiveMovesCount}</span> {myActiveMovesCount === 1 ? 'Move' : 'Moves'} live or upcoming.
+                You have joined or are hosting <span className="my-upcoming-count">{myActiveMovesCount}</span> {myActiveMovesCount === 1 ? 'Move' : 'Moves'} that {myActiveMovesCount === 1 ? 'is' : 'are'} live now or upcoming.
               </span>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                style={{ transform: showMyUpcoming ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
+              <span className="my-upcoming-action">
+                <span className="my-upcoming-view">
+                  <strong>
+                    <em>View</em>
+                  </strong>
+                </span>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="my-upcoming-arrow"
+                  style={{ transform: showMyUpcoming ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </span>
             </button>
             {showMyUpcoming && (
               <div className="my-upcoming-list">
-                {myActiveMoves.map((move) => (
-                  <MoveCard
-                    key={move.id}
-                    move={move}
-                    now={now}
-                    userName={userName}
-                    onJoinMove={onJoinMove}
-                    onLeaveMove={onLeaveMove}
-                    onSelectMove={onSelectMove}
-                    userLocation={userLocation}
-                  />
-                ))}
+                {joinedActiveMoves.length > 0 && (
+                  <div className="my-upcoming-section">
+                    <h4>Joined</h4>
+                    {joinedActiveMoves.map((move) => (
+                      <MoveCard
+                        key={move.id}
+                        move={move}
+                        now={now}
+                        userName={userName}
+                        onJoinMove={onJoinMove}
+                        onLeaveMove={onLeaveMove}
+                        onSelectMove={onSelectMove}
+                        userLocation={userLocation}
+                      />
+                    ))}
+                  </div>
+                )}
+                {hostingActiveMoves.length > 0 && (
+                  <div className="my-upcoming-section">
+                    <h4>Hosting</h4>
+                    {hostingActiveMoves.map((move) => (
+                      <MoveCard
+                        key={move.id}
+                        move={move}
+                        now={now}
+                        userName={userName}
+                        onJoinMove={onJoinMove}
+                        onLeaveMove={onLeaveMove}
+                        onSelectMove={onSelectMove}
+                        userLocation={userLocation}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
