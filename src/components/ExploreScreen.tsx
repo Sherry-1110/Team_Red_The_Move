@@ -184,7 +184,7 @@ export const ExploreScreen = ({
           </label>
 
           {activeView === 'explore' && (
-            <>
+            <div className="filter-buttons-group">
               <div className="filter-dropdown" ref={filterRef}>
                 <button
                   type="button"
@@ -350,7 +350,7 @@ export const ExploreScreen = ({
             >
               {viewMode === 'list' ? <MapIcon size={20} /> : <ListIcon size={20} />}
             </button>
-            </>
+            </div>
           )}
         </div>
 

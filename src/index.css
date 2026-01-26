@@ -1894,3 +1894,296 @@ img {
   flex: 1;
   overflow: hidden;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 16px 20px;
+  }
+
+  .app-header h1 {
+    font-size: 2rem;
+  }
+
+  .eyebrow {
+    font-size: 0.7rem;
+  }
+
+  .tagline {
+    font-size: 0.9rem;
+  }
+
+  .app-main {
+    padding: 16px;
+  }
+
+  .screen {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Tab Navigation */
+  .my-moves-tabs {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .my-moves-tab {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  /* Search and Filters - Keep horizontal */
+  .search-and-filters {
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-buttons-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .search {
+    width: auto;
+    min-width: 0;
+    flex: 0 0 auto;
+    position: relative;
+  }
+
+  /* Collapsible Search */
+  .search input {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%234e2a84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px;
+    color: transparent;
+  }
+
+  .search input::placeholder {
+    color: transparent;
+  }
+
+  .search input:focus,
+  .search input:not(:placeholder-shown) {
+    width: calc(100vw - 70px);
+    max-width: 100%;
+    padding: 10px 14px 10px 42px;
+    cursor: text;
+    color: var(--ink);
+    background-position: 12px center;
+  }
+
+  .search input:focus::placeholder,
+  .search input:not(:placeholder-shown)::placeholder {
+    color: var(--muted);
+  }
+
+  .filter-button {
+    padding: 10px 14px;
+  }
+
+  /* Move Cards */
+  .move-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .move-card__header h3 {
+    font-size: 1rem;
+  }
+
+  .move-card__subtitle {
+    font-size: 0.8rem;
+  }
+
+  .move-card__meta {
+    font-size: 0.85rem;
+  }
+
+  .status-badge {
+    font-size: 0.65rem;
+    padding: 5px 16px;
+  }
+
+  .move-card__time {
+    font-size: 0.75rem;
+  }
+
+  /* Buttons */
+  .btn {
+    font-size: 0.9rem;
+    padding: 10px 16px;
+  }
+
+  .btn--small {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  /* Floating Button */
+  .floating-create-btn {
+    width: 56px;
+    height: 56px;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .floating-create-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Modal Panel */
+  .modal-panel {
+    width: calc(100vw - 24px);
+    max-height: 85vh;
+    padding: 16px;
+  }
+
+  .panel-heading h2 {
+    font-size: 1.2rem;
+  }
+
+  /* Form Elements */
+  .form {
+    gap: 12px;
+  }
+
+  .form input,
+  .form textarea,
+  .form select {
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+
+  /* Detail Panel */
+  .detail {
+    padding: 20px;
+    max-height: 85vh;
+  }
+
+  .detail-header h2 {
+    font-size: 1.3rem;
+  }
+
+  /* Comments */
+  .comment-item {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: 12px 16px;
+  }
+
+  .app-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .tagline {
+    font-size: 0.85rem;
+  }
+
+  .app-main {
+    padding: 12px;
+  }
+
+  /* Tabs - make them stack on very small screens */
+  .my-moves-tabs {
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .my-moves-tab {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  /* Collapsible Search - smaller on very small screens */
+  .search input:focus,
+  .search input:not(:placeholder-shown) {
+    min-width: 160px;
+  }
+
+  /* Move Cards */
+  .move-card {
+    padding: 14px;
+  }
+
+  .move-card__header {
+    padding-right: 90px;
+  }
+
+  .move-card__header h3 {
+    font-size: 0.95rem;
+  }
+
+  .status-badge {
+    font-size: 0.6rem;
+    padding: 4px 12px;
+  }
+
+  /* Buttons */
+  .btn {
+    font-size: 0.85rem;
+    padding: 8px 14px;
+  }
+
+  .btn--small {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  /* Floating Button - slightly smaller on very small screens */
+  .floating-create-btn {
+    width: 52px;
+    height: 52px;
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .floating-create-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Modal adjustments */
+  .modal-panel {
+    width: calc(100vw - 16px);
+    padding: 14px;
+  }
+
+  .panel-heading h2 {
+    font-size: 1.1rem;
+  }
+
+  .modal-close-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Form Elements */
+  .form label {
+    font-size: 0.9rem;
+  }
+
+  .form input,
+  .form textarea,
+  .form select {
+    padding: 9px;
+    font-size: 0.9rem;
+  }
+}
