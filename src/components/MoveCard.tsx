@@ -1,5 +1,5 @@
 import type { Move, ActivityType, CampusArea } from '../types';
-import { formatTimeAgo, getStatusLabel } from '../utilities/helpers';
+import { formatTimeAgo, getStatusLabel, calculateDistance, formatDistance } from '../utilities/helpers';
 import { BookOpen, CalendarClock, MapPin, Star, UserRound, Users, UtensilsCrossed } from 'lucide-react';
 import type { ReactElement } from 'react';
 import { useSavedMoves } from '../contexts/SavedMovesContext';
@@ -12,6 +12,7 @@ type MoveCardProps = {
   onLeaveMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
   distance?: string | null;
+  userLocation?: { latitude: number; longitude: number } | null;
   variant?: 'default' | 'popup';
 };
 
@@ -23,6 +24,7 @@ export const MoveCard = ({
   onLeaveMove,
   onSelectMove,
   distance,
+  userLocation,
   variant = 'default',
 }: MoveCardProps) => {
   const isJoined = move.attendees.includes(userName);
@@ -33,6 +35,12 @@ export const MoveCard = ({
   const isPast = statusLabel === 'Past';
   const isJoinDisabled = !isJoined && (isFull || isPast);
   const { isSaved, toggleSave } = useSavedMoves();
+  
+  // Calculate distance if not provided but userLocation is available
+  const displayDistance = distance || (userLocation && move.latitude && move.longitude 
+    ? formatDistance(calculateDistance(userLocation.latitude, userLocation.longitude, move.latitude, move.longitude))
+    : null);
+
   const activityIcons: Record<ActivityType, ReactElement> = {
     Food: <UtensilsCrossed size={14} />,
     Study: <BookOpen size={14} />,
@@ -117,8 +125,8 @@ export const MoveCard = ({
             <div className="move-card__meta-row">
               <MapPin size={14} className="move-card__meta-icon" />
               <span>{displayLocation}</span>
-              {distance && (
-                <span className="move-card__distance">• {distance} away</span>
+              {displayDistance && (
+                <span className="move-card__distance">• {displayDistance} away</span>
               )}
             </div>
             <div className="move-card__meta-row">

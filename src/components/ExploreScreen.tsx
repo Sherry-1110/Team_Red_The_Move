@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Map as MapIcon, List as ListIcon, Star, MapPin } from 'lucide-react';
+import { Map as MapIcon, List as ListIcon, MapPin, Star } from 'lucide-react';
 import type { Move, CampusArea, ActivityType } from '../types';
 import { AREA_FILTERS } from '../types';
 import { MoveCard } from './MoveCard';
@@ -43,6 +43,7 @@ export const ExploreScreen = ({
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [activeView, setActiveView] = useState<'explore' | 'joined' | 'hosting' | 'saved'>('explore');
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+  const [showMyUpcoming, setShowMyUpcoming] = useState(false);
   
   const { unsaveMove, isSaved } = useSavedMoves();
   const { userLocation, locationError, isLocationLoading, requestLocation, hasLocationPermission } = useLocation();
@@ -144,16 +145,34 @@ export const ExploreScreen = ({
   });
 
   // Calculate upcoming and live moves that user is hosting or joined
-  const myActiveMovesCount = moves.filter((move) => {
-    const isHostingOrJoined = move.hostName === userName || move.attendees.includes(userName);
-    if (!isHostingOrJoined) return false;
-    
-    const start = new Date(move.startTime).getTime();
-    const end = new Date(move.endTime).getTime();
-    const isLiveOrUpcoming = now < end; // Live Now or Upcoming
-    
-    return isLiveOrUpcoming;
-  }).length;
+  const myActiveMoves = moves
+    .filter((move) => {
+      const isHostingOrJoined = move.hostName === userName || move.attendees.includes(userName);
+      if (!isHostingOrJoined) return false;
+      
+      const end = new Date(move.endTime).getTime();
+      const isLiveOrUpcoming = now < end;
+      
+      return isLiveOrUpcoming;
+    })
+    .sort((a, b) => {
+      const getStatusRank = (move: Move) => {
+        const start = new Date(move.startTime).getTime();
+        const end = new Date(move.endTime).getTime();
+        if (now >= start && now <= end) return 0; // Live Now
+        if (now < start) return 1; // Upcoming
+        return 2;
+      };
+      
+      const rankA = getStatusRank(a);
+      const rankB = getStatusRank(b);
+      if (rankA !== rankB) return rankA - rankB;
+      
+      // Sort by start time (soonest first)
+      return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+    });
+
+  const myActiveMovesCount = myActiveMoves.length;
 
   return (
     <>
@@ -414,6 +433,46 @@ export const ExploreScreen = ({
           )}
         </div>
 
+        {myActiveMovesCount > 0 && activeView === 'explore' && (
+          <div className="my-upcoming-banner">
+            <button
+              type="button"
+              className="my-upcoming-toggle"
+              onClick={() => setShowMyUpcoming((prev) => !prev)}
+            >
+              <span className="my-upcoming-text">
+                You have <span className="my-upcoming-count">{myActiveMovesCount}</span> {myActiveMovesCount === 1 ? 'Move' : 'Moves'} live or upcoming.
+              </span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                style={{ transform: showMyUpcoming ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            {showMyUpcoming && (
+              <div className="my-upcoming-list">
+                {myActiveMoves.map((move) => (
+                  <MoveCard
+                    key={move.id}
+                    move={move}
+                    now={now}
+                    userName={userName}
+                    onJoinMove={onJoinMove}
+                    onLeaveMove={onLeaveMove}
+                    onSelectMove={onSelectMove}
+                    userLocation={userLocation}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Explore View */}
