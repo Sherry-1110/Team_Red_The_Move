@@ -1,5 +1,5 @@
 import type { Move, ActivityType, CampusArea } from '../types';
-import { formatTimeAgo, getStatusLabel, calculateDistance, formatDistance } from '../utilities/helpers';
+import { formatTimeAgo, getStatusLabel } from '../utilities/helpers';
 import { BookOpen, CalendarClock, MapPin, Star, UserRound, Users, UtensilsCrossed } from 'lucide-react';
 import type { ReactElement } from 'react';
 import { useSavedMoves } from '../contexts/SavedMovesContext';
@@ -11,22 +11,9 @@ type MoveCardProps = {
   onJoinMove: (moveId: string) => void;
   onLeaveMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
-  distance?: string | null;
-  userLocation?: { latitude: number; longitude: number } | null;
-  variant?: 'default' | 'popup';
 };
 
-export const MoveCard = ({
-  move,
-  now,
-  userName,
-  onJoinMove,
-  onLeaveMove,
-  onSelectMove,
-  distance,
-  userLocation,
-  variant = 'default',
-}: MoveCardProps) => {
+export const MoveCard = ({ move, now, userName, onJoinMove, onLeaveMove, onSelectMove }: MoveCardProps) => {
   const isJoined = move.attendees.includes(userName);
   const isHost = move.hostName === userName;
   const statusLabel = getStatusLabel(move.startTime, move.endTime, now);
@@ -35,12 +22,6 @@ export const MoveCard = ({
   const isPast = statusLabel === 'Past';
   const isJoinDisabled = !isJoined && (isFull || isPast);
   const { isSaved, toggleSave } = useSavedMoves();
-  
-  // Calculate distance if not provided but userLocation is available
-  const displayDistance = distance || (userLocation && move.latitude && move.longitude 
-    ? formatDistance(calculateDistance(userLocation.latitude, userLocation.longitude, move.latitude, move.longitude))
-    : null);
-
   const activityIcons: Record<ActivityType, ReactElement> = {
     Food: <UtensilsCrossed size={14} />,
     Study: <BookOpen size={14} />,
@@ -90,16 +71,13 @@ export const MoveCard = ({
     return `${dateStr}, ${startTime}-${endTime} (${relative})`;
   };
 
-  const cardClassName = `move-card${variant === 'popup' ? ' move-card--popup' : ''}`;
-  const contentClassName = `move-card__content${variant === 'popup' ? ' move-card__content--stacked' : ' move-card__content--horizontal'}`;
-
   return (
-    <article className={cardClassName}>
+    <article className="move-card">
       <div
         role="button"
         tabIndex={0}
         aria-label={`Open move ${move.title}`}
-        className={contentClassName}
+        className="move-card__content move-card__content--horizontal"
         onClick={() => onSelectMove(move.id)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -125,9 +103,6 @@ export const MoveCard = ({
             <div className="move-card__meta-row">
               <MapPin size={14} className="move-card__meta-icon" />
               <span>{displayLocation}</span>
-              {displayDistance && (
-                <span className="move-card__distance">• {displayDistance} away</span>
-              )}
             </div>
             <div className="move-card__meta-row">
               <UserRound size={14} className="move-card__meta-icon" />
