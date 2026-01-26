@@ -16,7 +16,7 @@ type ExploreScreenProps = {
 
 export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, onSelectMove }: ExploreScreenProps) => {
   const [selectedAreas, setSelectedAreas] = useState<CampusArea[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(['Upcoming', 'Live Now']);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<ActivityType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);

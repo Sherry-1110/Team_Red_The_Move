@@ -53,7 +53,7 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
     longitude: undefined,
     startTime: toLocalDateTimeValue(initialNow),
     endTime: toLocalDateTimeValue(initialEnd),
-    maxParticipants: 2,
+    maxParticipants: 1,
     area: 'North',
     activityType: 'Social',
   });
@@ -127,8 +127,8 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
       setFormError('Title must be 50 characters or fewer.');
       return;
     }
-    if (normalizedMaxParticipants < 2) {
-      setFormError('Max participants must be at least 2.');
+    if (normalizedMaxParticipants < 1) {
+      setFormError('Max participants must be at least 1.');
       return;
     }
     if (normalizedMaxParticipants > 50) {
@@ -169,7 +169,7 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
       longitude: undefined,
       startTime: toLocalDateTimeValue(resetNow),
       endTime: toLocalDateTimeValue(resetEnd),
-      maxParticipants: 2,
+      maxParticipants: 1,
       area: 'North',
       activityType: 'Social',
     });
@@ -422,25 +422,19 @@ export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
         </div>
         {endTimeWarning && <p className="form-error">{endTimeWarning}</p>}
         <label>
-          <span className="form-label">
-            Max Participants <span className="form-required">*</span>
-          </span>
+          <span>Max Participants</span>
           <input
             type="number"
-            min={2}
+            min={1}
             max={50}
             value={formState.maxParticipants}
             onChange={(event) => {
               const nextValue = event.target.valueAsNumber;
               const cappedValue = Number.isNaN(nextValue) ? '' : Math.min(nextValue, 50);
               setMaxParticipantsWarning(
-                Number.isNaN(nextValue)
+                Number.isNaN(nextValue) || nextValue <= 50
                   ? ''
-                  : nextValue > 50
-                    ? 'Max participants cannot exceed 50.'
-                    : nextValue < 2
-                      ? 'Max participants must be at least 2.'
-                      : '',
+                  : 'Max participants cannot exceed 50.',
               );
               setFormState((prev) => ({
                 ...prev,
