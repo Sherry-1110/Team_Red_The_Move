@@ -11,20 +11,9 @@ type MoveCardProps = {
   onJoinMove: (moveId: string) => void;
   onLeaveMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
-  distance?: string | null;
-  variant?: 'default' | 'popup';
 };
 
-export const MoveCard = ({
-  move,
-  now,
-  userName,
-  onJoinMove,
-  onLeaveMove,
-  onSelectMove,
-  distance,
-  variant = 'default',
-}: MoveCardProps) => {
+export const MoveCard = ({ move, now, userName, onJoinMove, onLeaveMove, onSelectMove }: MoveCardProps) => {
   const isJoined = move.attendees.includes(userName);
   const isHost = move.hostName === userName;
   const statusLabel = getStatusLabel(move.startTime, move.endTime, now);
@@ -82,16 +71,13 @@ export const MoveCard = ({
     return `${dateStr}, ${startTime}-${endTime} (${relative})`;
   };
 
-  const cardClassName = `move-card${variant === 'popup' ? ' move-card--popup' : ''}`;
-  const contentClassName = `move-card__content${variant === 'popup' ? ' move-card__content--stacked' : ' move-card__content--horizontal'}`;
-
   return (
-    <article className={cardClassName}>
+    <article className="move-card">
       <div
         role="button"
         tabIndex={0}
         aria-label={`Open move ${move.title}`}
-        className={contentClassName}
+        className="move-card__content move-card__content--horizontal"
         onClick={() => onSelectMove(move.id)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -117,9 +103,6 @@ export const MoveCard = ({
             <div className="move-card__meta-row">
               <MapPin size={14} className="move-card__meta-icon" />
               <span>{displayLocation}</span>
-              {distance && (
-                <span className="move-card__distance">• {distance} away</span>
-              )}
             </div>
             <div className="move-card__meta-row">
               <UserRound size={14} className="move-card__meta-icon" />

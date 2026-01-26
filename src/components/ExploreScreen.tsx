@@ -1,39 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
-import { Map as MapIcon, List as ListIcon, Star, MapPin } from 'lucide-react';
+import { Map as MapIcon, List as ListIcon, MapPin } from 'lucide-react';
 import type { Move, CampusArea, ActivityType } from '../types';
 import { AREA_FILTERS } from '../types';
 import { MoveCard } from './MoveCard';
 import { MapView } from './MapView';
-import { useSavedMoves } from '../contexts/SavedMovesContext';
 import { useLocation } from '../contexts/LocationContext';
-import { formatTimeAgo, formatEventTime, getStatusLabel, calculateDistance, formatDistance } from '../utilities/helpers';
+import { calculateDistance, formatDistance } from '../utilities/helpers';
 import { getDefaultCoordinatesForArea } from '../utilities/locations';
 
 type ExploreScreenProps = {
   moves: Move[];
   now: number;
   userName: string;
-  joinedMoves: Move[];
-  hostingMoves: Move[];
   onJoinMove: (moveId: string) => void;
   onLeaveMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
-  onCancelMove: (moveId: string) => void;
-  onEditMove?: (moveId: string) => void;
 };
 
-export const ExploreScreen = ({ 
-  moves, 
-  now, 
-  userName, 
-  joinedMoves,
-  hostingMoves,
-  onJoinMove, 
-  onLeaveMove, 
-  onSelectMove,
-  onCancelMove,
-  onEditMove,
-}: ExploreScreenProps) => {
+export const ExploreScreen = ({ moves, now, userName, onJoinMove, onLeaveMove, onSelectMove }: ExploreScreenProps) => {
   const [selectedAreas, setSelectedAreas] = useState<CampusArea[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<ActivityType[]>([]);
@@ -42,12 +26,10 @@ export const ExploreScreen = ({
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'upcoming' | 'newest' | 'popularity'>('upcoming');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  const [activeView, setActiveView] = useState<'explore' | 'joined' | 'hosting' | 'saved'>('explore');
+  const [isMyMovesExpanded, setIsMyMovesExpanded] = useState(false);
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   
-  const { unsaveMove, isSaved } = useSavedMoves();
   const { userLocation, locationError, isLocationLoading, requestLocation } = useLocation();
-  
   const filterRef = useRef<HTMLDivElement | null>(null);
   const sortRef = useRef<HTMLDivElement | null>(null);
 
@@ -76,10 +58,6 @@ export const ExploreScreen = ({
     
     return formatDistance(dist);
   };
-
-  // Filter all moves to get only saved ones from the full collection
-  const savedMoves = moves.filter((move) => isSaved(move.id));
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -101,7 +79,6 @@ export const ExploreScreen = ({
       setShowLocationPrompt(false);
     }
   }, [viewMode, userLocation, isLocationLoading]);
-
   const filteredMoves = moves.filter((move) => {
     // Filter by selected campus areas
     if (selectedAreas.length > 0 && !selectedAreas.includes(move.area)) {
@@ -166,117 +143,61 @@ export const ExploreScreen = ({
     return 0;
   });
 
+  const myActiveMoves = moves
+    .filter((move) => {
+      const isHost = move.hostName === userName;
+      const isJoined = move.attendees.includes(userName);
+      if (!isHost && !isJoined) return false;
+
+      const end = new Date(move.endTime).getTime();
+      return end >= now; // Live or Upcoming (not Past)
+    })
+    .sort((a, b) => {
+      const getStatusRank = (m: Move) => {
+        const start = new Date(m.startTime).getTime();
+        const end = new Date(m.endTime).getTime();
+        if (now >= start && now <= end) return 0; // Live Now
+        if (now < start) return 1; // Upcoming
+        return 2; // Past
+      };
+      const rankA = getStatusRank(a);
+      const rankB = getStatusRank(b);
+      if (rankA !== rankB) return rankA - rankB;
+      return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+    });
 
   return (
     <>
-      {showLocationPrompt && (
-        <div className="location-prompt">
-          <div className="location-prompt-content">
-            <MapPin size={20} />
-            <div className="location-prompt-text">
-              <p>
-                <strong>Enable location services</strong> to see your position on the map and find moves near you.
-              </p>
-              {locationError && <p className="error-text">{locationError}</p>}
-            </div>
-            <div className="location-prompt-actions">
-              <button
-                type="button"
-                className="btn btn--small btn--primary"
-                onClick={() => {
-                  requestLocation();
-                  setShowLocationPrompt(false);
-                }}
-                disabled={isLocationLoading}
-              >
-                {isLocationLoading ? 'Getting location...' : 'Enable Location'}
-              </button>
-              <button
-                type="button"
-                className="btn btn--small btn--ghost"
-                onClick={() => setShowLocationPrompt(false)}
-              >
-                Skip
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <section className="explore-tools">
-        {/* Tab Navigation for Explore, Joined, Hosting, Saved */}
-        <nav className="my-moves-tabs" role="tablist" aria-label="Move Views">
+        <label className="search">
+          <span className="sr-only">Search moves</span>
+          <input
+            type="search"
+            placeholder="Search by activity, location, or keyword"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
+        </label>
+        <div className="filter-dropdown" ref={filterRef}>
           <button
             type="button"
-            role="tab"
-            aria-selected={activeView === 'explore'}
-            className={`my-moves-tab ${activeView === 'explore' ? 'my-moves-tab--active' : ''}`}
-            onClick={() => setActiveView('explore')}
+            className="filter-button"
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            aria-label="Filter moves"
           >
-            Explore
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
           </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeView === 'joined'}
-            className={`my-moves-tab ${activeView === 'joined' ? 'my-moves-tab--active' : ''}`}
-            onClick={() => setActiveView('joined')}
-          >
-            Joined
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeView === 'hosting'}
-            className={`my-moves-tab ${activeView === 'hosting' ? 'my-moves-tab--active' : ''}`}
-            onClick={() => setActiveView('hosting')}
-          >
-            Hosting
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeView === 'saved'}
-            className={`my-moves-tab ${activeView === 'saved' ? 'my-moves-tab--active' : ''}`}
-            onClick={() => setActiveView('saved')}
-          >
-            Saved
-          </button>
-        </nav>
-
-        <div className="search-and-filters">
-          <label className="search">
-            <span className="sr-only">Search moves</span>
-            <input
-              type="search"
-              placeholder="Search by activity, location, or keyword"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-            />
-          </label>
-
-          {activeView === 'explore' && (
-            <div className="filter-buttons-group">
-              <div className="filter-dropdown" ref={filterRef}>
-                <button
-                  type="button"
-                  className="filter-button"
-                  onClick={() => setIsFilterOpen(!isFilterOpen)}
-                  aria-label="Filter moves"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                  </svg>
-                </button>
           {isFilterOpen && (
             <div className="filter-menu">
               <div className="filter-section">
@@ -365,9 +286,9 @@ export const ExploreScreen = ({
               </div>
             </div>
           )}
-            </div>
+        </div>
 
-            <div className="sort-dropdown" ref={sortRef}>
+        <div className="sort-dropdown" ref={sortRef}>
           <button
             type="button"
             className="filter-button"
@@ -411,285 +332,140 @@ export const ExploreScreen = ({
               ))}
             </div>
           )}
-            </div>
+        </div>
 
-            <button
-              type="button"
-              className="filter-button"
-              onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
-              aria-label={viewMode === 'list' ? 'Switch to map view' : 'Switch to list view'}
-              style={{ background: 'var(--purple)', color: '#fff' }}
+        <button
+          type="button"
+          className="filter-button"
+          onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
+          aria-label={viewMode === 'list' ? 'Switch to map view' : 'Switch to list view'}
+          style={{ background: 'var(--purple)', color: '#fff' }}
+        >
+          {viewMode === 'list' ? <MapIcon size={20} /> : <ListIcon size={20} />}
+        </button>
+      </section>
+
+      {myActiveMoves.length > 0 && (
+        <div className="active-moves-section">
+          <button
+            className="active-moves-bar"
+            onClick={() => setIsMyMovesExpanded(!isMyMovesExpanded)}
+          >
+            <span>
+              You have <span className="active-moves-count">{myActiveMoves.length}</span> Moves
+              live or upcoming.
+            </span>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                transform: isMyMovesExpanded ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.2s',
+              }}
             >
-              {viewMode === 'list' ? <MapIcon size={20} /> : <ListIcon size={20} />}
-            </button>
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          {isMyMovesExpanded && (
+            <div className="active-moves-list">
+              {myActiveMoves.map((move) => (
+                <MoveCard
+                  key={move.id}
+                  move={move}
+                  now={now}
+                  userName={userName}
+                  onJoinMove={onJoinMove}
+                  onLeaveMove={onLeaveMove}
+                  onSelectMove={onSelectMove}
+                distance={getDistanceText(move)}
+                />
+              ))}
             </div>
           )}
         </div>
+      )}
 
-      </section>
-
-      {/* Explore View */}
-      {activeView === 'explore' && (
-        <>
-          <section aria-live="polite" className="move-list">
-            {exploreMoves.length === 0 ? (
-          <div className="empty-state">
-            <h3>No moves yet</h3>
-            <p>Try another filter or post a new hangout.</p>
+      {showLocationPrompt && (
+        <div className="location-prompt">
+          <div className="location-prompt-content">
+            <MapPin size={20} />
+            <div className="location-prompt-text">
+              <p>
+                <strong>Enable location services</strong> to see your position on the map and find moves near you.
+              </p>
+              {locationError && <p className="error-text">{locationError}</p>}
+            </div>
+            <div className="location-prompt-actions">
+              <button
+                type="button"
+                className="btn btn--small btn--primary"
+                onClick={() => {
+                  requestLocation();
+                  setShowLocationPrompt(false);
+                }}
+                disabled={isLocationLoading}
+              >
+                {isLocationLoading ? 'Getting location...' : 'Enable Location'}
+              </button>
+              <button
+                type="button"
+                className="btn btn--small btn--ghost"
+                onClick={() => setShowLocationPrompt(false)}
+              >
+                Skip
+              </button>
+            </div>
           </div>
+        </div>
+      )}
+
+      <section aria-live="polite" className="move-list">
+        {viewMode === 'list' ? (
+          exploreMoves.length === 0 ? (
+            <div className="empty-state">
+              <h3>No moves yet</h3>
+              <p>Try another filter or post a new hangout.</p>
+            </div>
+          ) : (
+            exploreMoves.map((move) => (
+              <MoveCard
+                key={move.id}
+                move={move}
+                now={now}
+                userName={userName}
+                onJoinMove={onJoinMove}
+                onLeaveMove={onLeaveMove}
+                onSelectMove={onSelectMove}
+                distance={getDistanceText(move)}
+              />
+            ))
+          )
         ) : (
-          exploreMoves.map((move) => (
-            <MoveCard
-              key={move.id}
-              move={move}
+          exploreMoves.length === 0 ? (
+            <div className="empty-state">
+              <h3>No moves yet</h3>
+              <p>Try another filter or post a new hangout.</p>
+            </div>
+          ) : (
+            <MapView
+              moves={exploreMoves}
               now={now}
               userName={userName}
               onJoinMove={onJoinMove}
               onLeaveMove={onLeaveMove}
               onSelectMove={onSelectMove}
-              distance={getDistanceText(move)}
+              userLocation={userLocation}
+              onClose={() => setViewMode('list')}
             />
-          ))
+          )
         )}
-          </section>
-
-        {viewMode === 'map' && exploreMoves.length > 0 && (
-          <MapView
-            moves={exploreMoves}
-            now={now}
-            userName={userName}
-            onJoinMove={onJoinMove}
-            onLeaveMove={onLeaveMove}
-            onSelectMove={onSelectMove}
-            userLocation={userLocation}
-            onClose={() => setViewMode('list')}
-          />
-        )}
-        </>
-      )}
-
-      {/* Joined Moves View */}
-      {activeView === 'joined' && (
-        <section className="move-list">
-          {joinedMoves.length === 0 ? (
-            <div className="empty-state">
-              <h3>No joined moves</h3>
-              <p>Jump into a move from Explore to see it here.</p>
-            </div>
-          ) : (
-            joinedMoves.map((move) => (
-              <article key={move.id} className="move-card move-card--compact">
-                <div className="move-card__content">
-                  <div className="move-card__header">
-                    <div>
-                      <h3>{move.title}</h3>
-                      <p className="move-card__subtitle">Hosted by {move.hostName}</p>
-                    </div>
-                    <div className="move-card__status">
-                      <span
-                        className={`status-badge ${
-                          getStatusLabel(move.startTime, move.endTime, now) === 'Past'
-                            ? 'status-badge--past'
-                            : ''
-                        }`}
-                      >
-                        {getStatusLabel(move.startTime, move.endTime, now)}
-                      </span>
-                      <span className="move-card__time">
-                        {formatTimeAgo(move.createdAt, now)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="move-card__meta">
-                    <span>{move.locationName || move.location}</span>
-                    <span>
-                      {formatEventTime(move.startTime)} - {formatEventTime(move.endTime)}
-                    </span>
-                    <span>{move.activityType}</span>
-                  </div>
-                  <div className="move-card__footer">
-                    <span className="attendee-count">{move.attendees.length} going</span>
-                    <div className="move-card__actions">
-                      <button
-                        className="btn btn--small"
-                        type="button"
-                        onClick={() => onSelectMove(move.id)}
-                      >
-                        Details
-                      </button>
-                      <button
-                        className="btn btn--small btn--ghost"
-                        type="button"
-                        aria-label={`Leave ${move.title}`}
-                        onClick={() => onLeaveMove(move.id)}
-                      >
-                        Leave
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))
-          )}
-        </section>
-      )}
-
-      {/* Hosting Moves View */}
-      {activeView === 'hosting' && (
-        <section className="move-list">
-          {hostingMoves.length === 0 ? (
-            <div className="empty-state">
-              <h3>No hosting moves</h3>
-              <p>Create a move to rally people nearby.</p>
-            </div>
-          ) : (
-            hostingMoves.map((move) => (
-              <article key={move.id} className="move-card move-card--compact">
-                <div className="move-card__content">
-                  <div className="move-card__header">
-                    <div>
-                      <h3>{move.title}</h3>
-                      <p className="move-card__subtitle">You&apos;re hosting</p>
-                    </div>
-                    <div className="move-card__status">
-                      <span
-                        className={`status-badge ${
-                          getStatusLabel(move.startTime, move.endTime, now) === 'Past'
-                            ? 'status-badge--past'
-                            : ''
-                        }`}
-                      >
-                        {getStatusLabel(move.startTime, move.endTime, now)}
-                      </span>
-                      <span className="move-card__time">
-                        {formatTimeAgo(move.createdAt, now)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="move-card__meta">
-                    <span>{move.locationName || move.location}</span>
-                    <span>
-                      {formatEventTime(move.startTime)} - {formatEventTime(move.endTime)}
-                    </span>
-                  </div>
-                  <div className="move-card__footer">
-                    <span className="attendee-count">{move.attendees.length} going</span>
-                    <div className="move-card__actions">
-                      <button
-                        className="btn btn--ghost btn--small"
-                        type="button"
-                        onClick={() => onEditMove?.(move.id)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="btn btn--ghost btn--small"
-                        type="button"
-                        onClick={() => onCancelMove(move.id)}
-                        aria-label="Cancel move"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M3 6h18" />
-                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                        </svg>
-                      </button>
-                      <button
-                        className="btn btn--small"
-                        type="button"
-                        onClick={() => onSelectMove(move.id)}
-                      >
-                        Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))
-          )}
-        </section>
-      )}
-
-      {/* Saved Moves View */}
-      {activeView === 'saved' && (
-        <section className="move-list">
-          {savedMoves.length === 0 ? (
-            <div className="empty-state">
-              <h3>No saved moves</h3>
-              <p>Save moves from Explore to see them here.</p>
-            </div>
-          ) : (
-            savedMoves.map((move) => (
-              <article key={move.id} className="move-card move-card--compact">
-                <div className="move-card__content">
-                  <div className="move-card__header">
-                    <div>
-                      <h3>{move.title}</h3>
-                      <p className="move-card__subtitle">Hosted by {move.hostName}</p>
-                    </div>
-                    <div className="move-card__status">
-                      <span
-                        className={`status-badge ${
-                          getStatusLabel(move.startTime, move.endTime, now) === 'Past'
-                            ? 'status-badge--past'
-                            : ''
-                        }`}
-                      >
-                        {getStatusLabel(move.startTime, move.endTime, now)}
-                      </span>
-                      <span className="move-card__time">
-                        {formatTimeAgo(move.createdAt, now)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="move-card__meta">
-                    <span>{move.locationName || move.location}</span>
-                    <span>
-                      {formatEventTime(move.startTime)} - {formatEventTime(move.endTime)}
-                    </span>
-                    <span>{move.activityType}</span>
-                  </div>
-                  <div className="move-card__footer">
-                    <span className="attendee-count">{move.attendees.length} going</span>
-                    <div className="move-card__actions">
-                      <button
-                        className="btn btn--small"
-                        type="button"
-                        onClick={() => onSelectMove(move.id)}
-                      >
-                        Details
-                      </button>
-                      <button
-                        className="save-toggle-btn"
-                        type="button"
-                        aria-label={`Unsave ${move.title}`}
-                        aria-pressed="true"
-                        onClick={() => void unsaveMove(move.id)}
-                        title="Remove from saved"
-                      >
-                        <Star
-                          size={16}
-                          strokeWidth={2}
-                          fill="currentColor"
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))
-          )}
-        </section>
-      )}
+      </section>
     </>
   );
 };

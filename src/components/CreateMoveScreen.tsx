@@ -22,10 +22,9 @@ type FormState = {
 
 type CreateMoveScreenProps = {
   onCreateMove: (formData: FormState) => void;
-  onClose?: () => void;
 };
 
-export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProps) => {
+export const CreateMoveScreen = ({ onCreateMove }: CreateMoveScreenProps) => {
   const getLocalDateString = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -276,34 +275,11 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <section className="create-panel modal-panel" onClick={(e) => e.stopPropagation()}>
-        <div className="panel-heading">
-          <h2>Create a Move</h2>
-          <p>Share a quick plan and publish it instantly.</p>
-          {onClose && (
-            <button
-              type="button"
-              className="modal-close-btn"
-              onClick={onClose}
-              aria-label="Close"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          )}
-        </div>
+    <section className="create-panel">
+      <div className="panel-heading">
+        <h2>Create a Move</h2>
+        <p>Share a quick plan and publish it instantly.</p>
+      </div>
       <form className="form" onSubmit={handleSubmit}>
         <label>
           <span className="form-label">
@@ -578,7 +554,6 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
           Post Move
         </button>
       </form>
-      </section>
-    </div>
+    </section>
   );
 };
