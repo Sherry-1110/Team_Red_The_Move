@@ -104,7 +104,7 @@ img {
   z-index: 1;
   max-width: 720px;
   margin: 0 auto;
-  padding: 24px 20px 80px;
+  padding: 24px 28px 80px;
 }
 
 .app-header {
@@ -419,7 +419,7 @@ img {
 }
 
 .move-card__content {
-  padding: 14px 18px;
+  padding: 10px 14px;
   display: grid;
   gap: 12px;
 }
@@ -2039,7 +2039,7 @@ img {
   }
 
   .app-main {
-    padding: 0 16px 20px;
+    padding: 0 24px 20px;
   }
 
   .screen {
@@ -2227,7 +2227,7 @@ img {
   }
 
   .app-main {
-    padding: 0 12px 16px;
+    padding: 0 20px 16px;
   }
 
   /* Tabs - make them stack on very small screens */
