@@ -33,29 +33,35 @@ export const MyMovesScreen = ({
 
   return (
     <section className="my-moves">
-      <div className="sub-tabs" role="tablist" aria-label="My Moves">
+      <nav className="my-moves-tabs" role="tablist" aria-label="My Moves">
         <button
           type="button"
-          className={`sub-tab ${myMovesTab === 'joined' ? 'sub-tab--active' : ''}`}
+          role="tab"
+          aria-selected={myMovesTab === 'joined'}
+          className={`my-moves-tab ${myMovesTab === 'joined' ? 'my-moves-tab--active' : ''}`}
           onClick={() => setMyMovesTab('joined')}
         >
           Joined
         </button>
         <button
           type="button"
-          className={`sub-tab ${myMovesTab === 'hosting' ? 'sub-tab--active' : ''}`}
+          role="tab"
+          aria-selected={myMovesTab === 'hosting'}
+          className={`my-moves-tab ${myMovesTab === 'hosting' ? 'my-moves-tab--active' : ''}`}
           onClick={() => setMyMovesTab('hosting')}
         >
           Hosting
         </button>
         <button
           type="button"
-          className={`sub-tab ${myMovesTab === 'saved' ? 'sub-tab--active' : ''}`}
+          role="tab"
+          aria-selected={myMovesTab === 'saved'}
+          className={`my-moves-tab ${myMovesTab === 'saved' ? 'my-moves-tab--active' : ''}`}
           onClick={() => setMyMovesTab('saved')}
         >
           Saved
         </button>
-      </div>
+      </nav>
       <div className="move-list">
         {myMovesTab === 'joined' && (
           <>

@@ -11,10 +11,20 @@ type MoveCardProps = {
   onJoinMove: (moveId: string) => void;
   onLeaveMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
-  distance?: string | null; // Optional distance to display
+  distance?: string | null;
+  variant?: 'default' | 'popup';
 };
 
-export const MoveCard = ({ move, now, userName, onJoinMove, onLeaveMove, onSelectMove, distance }: MoveCardProps) => {
+export const MoveCard = ({
+  move,
+  now,
+  userName,
+  onJoinMove,
+  onLeaveMove,
+  onSelectMove,
+  distance,
+  variant = 'default',
+}: MoveCardProps) => {
   const isJoined = move.attendees.includes(userName);
   const isHost = move.hostName === userName;
   const statusLabel = getStatusLabel(move.startTime, move.endTime, now);
@@ -72,13 +82,16 @@ export const MoveCard = ({ move, now, userName, onJoinMove, onLeaveMove, onSelec
     return `${dateStr}, ${startTime}-${endTime} (${relative})`;
   };
 
+  const cardClassName = `move-card${variant === 'popup' ? ' move-card--popup' : ''}`;
+  const contentClassName = `move-card__content${variant === 'popup' ? ' move-card__content--stacked' : ' move-card__content--horizontal'}`;
+
   return (
-    <article className="move-card">
+    <article className={cardClassName}>
       <div
         role="button"
         tabIndex={0}
         aria-label={`Open move ${move.title}`}
-        className="move-card__content move-card__content--horizontal"
+        className={contentClassName}
         onClick={() => onSelectMove(move.id)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {

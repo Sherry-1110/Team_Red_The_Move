@@ -14,11 +14,9 @@ import { signOut } from './utilities/auth';
 import { useAuth } from './contexts/AuthContext';
 import { ExploreScreen } from './components/ExploreScreen';
 import { CreateMoveScreen } from './components/CreateMoveScreen';
-import { MyMovesScreen } from './components/MyMovesScreen';
 import { MoveDetailScreen } from './components/MoveDetailScreen';
 import { EditMoveScreen } from './components/EditMoveScreen';
 import { LoginScreen } from './components/LoginScreen';
-import { BottomNav } from './components/BottomNav';
 
 const defaultUser: User = {
   id: 'user-1',
@@ -28,7 +26,7 @@ const defaultUser: User = {
 const App = () => {
   const { user: firebaseUser, loading } = useAuth();
   const [moves, setMoves] = useState<Move[]>([]);
-  const [activeTab, setActiveTab] = useState<'explore' | 'create' | 'profile'>('explore');
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedMoveId, setSelectedMoveId] = useState<string | null>(null);
   const [editingMoveId, setEditingMoveId] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
@@ -225,7 +223,6 @@ const App = () => {
         maxParticipants: normalizedMaxParticipants,
         comments: [],
       });
-      setActiveTab('explore');
     } catch (error) {
       console.error('Error creating move:', error);
     }
@@ -268,7 +265,6 @@ const App = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      setActiveTab('explore');
       setSelectedMoveId(null);
     } catch (error) {
       console.error('Error signing out:', error);
@@ -303,56 +299,69 @@ const App = () => {
   return (
     <div className="app-shell">
       <div className="screen">
-        {activeTab === 'explore' && (
-          <header className="app-header">
-            <div>
-              <p className="eyebrow">Northwestern Student Hangouts</p>
-              <h1>The Move</h1>
-              <p className="tagline">A live feed for spontaneous campus plans.</p>
-            </div>
-            <button
-              type="button"
-              className="btn btn--ghost btn--small"
-              onClick={handleSignOut}
-              style={{ position: 'absolute', top: '20px', right: '20px' }}
-            >
-              Sign Out
-            </button>
-          </header>
-        )}
+        <header className="app-header">
+          <div>
+            <p className="eyebrow">Northwestern Student Hangouts</p>
+            <h1>The Move</h1>
+            <p className="tagline">A live feed for spontaneous campus plans.</p>
+          </div>
+          <button
+            type="button"
+            className="btn btn--ghost btn--small"
+            onClick={handleSignOut}
+            style={{ position: 'absolute', top: '20px', right: '20px' }}
+          >
+            Sign Out
+          </button>
+        </header>
 
         <main className="app-main">
-          {activeTab === 'explore' && (
-            <ExploreScreen
-              moves={moves}
-              now={now}
-              userName={user.name}
-              onJoinMove={handleJoinMove}
-              onLeaveMove={handleLeaveMove}
-              onSelectMove={setSelectedMoveId}
-            />
-          )}
-
-          {activeTab === 'create' && (
-            <CreateMoveScreen onCreateMove={handleCreateMove} />
-          )}
-
-          {activeTab === 'profile' && (
-            <MyMovesScreen
-              allMoves={moves}
-              joinedMoves={joinedMoves}
-              hostingMoves={hostingMoves}
-              now={now}
-              onCancelMove={handleCancelMove}
-              onLeaveMove={handleLeaveMove}
-              onSelectMove={setSelectedMoveId}
-              onEditMove={setEditingMoveId}
-            />
-          )}
+          <ExploreScreen
+            moves={moves}
+            now={now}
+            userName={user.name}
+            joinedMoves={joinedMoves}
+            hostingMoves={hostingMoves}
+            onJoinMove={handleJoinMove}
+            onLeaveMove={handleLeaveMove}
+            onSelectMove={setSelectedMoveId}
+            onCancelMove={handleCancelMove}
+            onEditMove={setEditingMoveId}
+          />
         </main>
       </div>
 
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Floating Create Button */}
+      <button
+        type="button"
+        className="floating-create-btn"
+        onClick={() => setIsCreateOpen(true)}
+        aria-label="Create new move"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+
+      {isCreateOpen && (
+        <CreateMoveScreen 
+          onCreateMove={(move) => {
+            handleCreateMove(move);
+            setIsCreateOpen(false);
+          }} 
+          onClose={() => setIsCreateOpen(false)}
+        />
+      )}
 
       {selectedMove && (
         <MoveDetailScreen

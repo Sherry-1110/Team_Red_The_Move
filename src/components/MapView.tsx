@@ -1,9 +1,12 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { X } from 'lucide-react';
 import type { Move, ActivityType } from '../types';
 import { getDefaultCoordinatesForArea } from '../utilities/locations';
-import { MapMoveCard } from './MapMoveCard';
+import { MoveCard } from './MoveCard';
+
+const { BaseLayer } = LayersControl;
 
 // Helper to create category-specific markers
 const createCategoryIcon = (category: ActivityType) => {
@@ -90,6 +93,7 @@ type MapViewProps = {
   onLeaveMove: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
   userLocation?: { latitude: number; longitude: number } | null;
+  onClose?: () => void;
 };
 
 export const MapView = ({
@@ -100,63 +104,106 @@ export const MapView = ({
   onLeaveMove,
   onSelectMove,
   userLocation,
+  onClose,
 }: MapViewProps) => {
   // Northwestern campus center coordinates
   const mapCenter = [42.0500, -87.6750] as [number, number];
   const mapZoom = 14;
 
   return (
-    <div className="map-container">
-      <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }}>
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {moves.map((move) => {
-          // Use provided coordinates or calculate from area
-          let lat = move.latitude;
-          let lng = move.longitude;
-          if (lat === undefined || lng === undefined) {
-            const defaultCoords = getDefaultCoordinatesForArea(move.area);
-            lat = defaultCoords.latitude;
-            lng = defaultCoords.longitude;
-          }
+    <div className="map-overlay">
+      <div className="map-header">
+        <h2>Map View</h2>
+        <button
+          type="button"
+          className="map-close-btn"
+          onClick={onClose}
+          aria-label="Close map view"
+        >
+          <X size={24} />
+        </button>
+      </div>
+      <div className="map-container-fullscreen">
+        <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }}>
+          {/* Layer Control for switching between map types */}
+          <LayersControl position="topright">
+            {/* OpenStreetMap - Default Street View */}
+            <BaseLayer checked name="Street Map">
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
+              />
+            </BaseLayer>
 
-          return (
-            <Marker 
-              key={move.id} 
-              position={[lat, lng]} 
-              icon={createCategoryIcon(move.activityType)}
+            {/* CartoDB Positron - Clean Light Style */}
+            <BaseLayer name="Clean (Light)">
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                maxZoom={19}
+              />
+            </BaseLayer>
+
+            {/* Stamen Watercolor - Artistic Style */}
+            <BaseLayer name="Watercolor">
+              <TileLayer
+                attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg"
+                maxZoom={16}
+              />
+            </BaseLayer>
+          </LayersControl>
+
+          {/* Markers for each move */}
+          {moves.map((move) => {
+            // Use provided coordinates or calculate from area
+            let lat = move.latitude;
+            let lng = move.longitude;
+            if (lat === undefined || lng === undefined) {
+              const defaultCoords = getDefaultCoordinatesForArea(move.area);
+              lat = defaultCoords.latitude;
+              lng = defaultCoords.longitude;
+            }
+
+            return (
+              <Marker 
+                key={move.id} 
+                position={[lat, lng]} 
+                icon={createCategoryIcon(move.activityType)}
+              >
+                <Popup>
+                  <div className="map-popup-card">
+                    <MoveCard
+                      move={move}
+                      now={now}
+                      userName={userName}
+                      onJoinMove={onJoinMove}
+                      onLeaveMove={onLeaveMove}
+                      onSelectMove={onSelectMove}
+                      variant="popup"
+                    />
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+
+          {/* User location marker */}
+          {userLocation && (
+            <Marker
+              position={[userLocation.latitude, userLocation.longitude]}
+              icon={createUserLocationIcon()}
             >
               <Popup>
-                <MapMoveCard
-                  move={move}
-                  now={now}
-                  userName={userName}
-                  onJoinMove={onJoinMove}
-                  onLeaveMove={onLeaveMove}
-                  onSelectMove={onSelectMove}
-                  userLocation={userLocation}
-                />
+                <div style={{ textAlign: 'center', padding: '8px' }}>
+                  <strong>Your Location</strong>
+                </div>
               </Popup>
             </Marker>
-          );
-        })}
-
-        {/* User location marker */}
-        {userLocation && (
-          <Marker
-            position={[userLocation.latitude, userLocation.longitude]}
-            icon={createUserLocationIcon()}
-          >
-            <Popup>
-              <div style={{ textAlign: 'center', padding: '8px' }}>
-                <strong>Your Location</strong>
-              </div>
-            </Popup>
-          </Marker>
-        )}
-      </MapContainer>
+          )}
+        </MapContainer>
+      </div>
     </div>
   );
 };

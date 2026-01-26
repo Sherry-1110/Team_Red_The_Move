@@ -26,14 +26,15 @@ export const LoginScreen = ({ onSignIn }: LoginScreenProps) => {
     <div className="login-screen">
       <div className="login-container">
         <header className="login-header">
-          <p className="eyebrow">Northwestern Student Hangouts</p>
-          <h1>The Move</h1>
-          <p className="tagline">A live feed for spontaneous campus plans.</p>
+          {/* <p className="eyebrow">Northwestern Student Hangouts</p> */}
+          {/* <h1>The Move</h1> */}
+          {/* <p className="tagline">A live feed for spontaneous campus plans.</p> */}
         </header>
 
         <div className="login-content">
-          <h2>Welcome!</h2>
-          <p>Sign in with your Google account to get started.</p>
+          <h2>Welcome to The Move!</h2>
+          {/* <p>Sign in with your Google account to get started.</p> */}
+          <p className="tagline">A live feed for spontaneous campus plans.</p>
 
           {error && <div className="login-error">{error}</div>}
 
