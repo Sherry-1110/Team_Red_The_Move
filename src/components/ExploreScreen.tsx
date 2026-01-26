@@ -34,7 +34,7 @@ export const ExploreScreen = ({
   onEditMove,
 }: ExploreScreenProps) => {
   const [selectedAreas, setSelectedAreas] = useState<CampusArea[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(['Upcoming', 'Live Now']);
   const [selectedCategories, setSelectedCategories] = useState<ActivityType[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
