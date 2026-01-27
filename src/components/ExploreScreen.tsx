@@ -47,7 +47,7 @@ export const ExploreScreen = ({
   const [showMyUpcoming, setShowMyUpcoming] = useState(false);
   
   const { unsaveMove, isSaved } = useSavedMoves();
-  const { userLocation, locationError, isLocationLoading, requestLocation, hasLocationPermission } = useLocation();
+  const { userLocation, isLocationLoading, requestLocation, hasLocationPermission } = useLocation();
   
   const filterRef = useRef<HTMLDivElement | null>(null);
   const sortRef = useRef<HTMLDivElement | null>(null);
