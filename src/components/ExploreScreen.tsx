@@ -51,6 +51,9 @@ export const ExploreScreen = ({
   
   const filterRef = useRef<HTMLDivElement | null>(null);
   const sortRef = useRef<HTMLDivElement | null>(null);
+  const tabsRef = useRef<HTMLElement | null>(null);
+  const tabsContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isTabsSticky, setIsTabsSticky] = useState(false);
 
   const areaOptions = AREA_FILTERS.filter((area) => area !== 'All') as CampusArea[];
   const statusOptions = ['Upcoming', 'Live Now', 'Past'] as const;
@@ -80,6 +83,28 @@ export const ExploreScreen = ({
       setShowLocationPrompt(false);
     }
   }, [viewMode, hasLocationPermission, userLocation]);
+
+  // Handle sticky tabs with overflow-x: hidden workaround
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!tabsRef.current || !tabsContainerRef.current) return;
+      
+      const containerRect = tabsContainerRef.current.getBoundingClientRect();
+      
+      // Check if tabs should be sticky (when scrolled past their original position)
+      // When container top is at or above viewport top, switch to fixed
+      if (containerRect.top <= 0) {
+        setIsTabsSticky(true);
+      } else {
+        setIsTabsSticky(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Check initial state
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const filteredMoves = moves.filter((move) => {
     // Filter by selected campus areas
@@ -219,7 +244,13 @@ export const ExploreScreen = ({
       )}
 
       {/* Tab Navigation for Explore, Joined, Hosting, Saved */}
-      <nav className="my-moves-tabs" role="tablist" aria-label="Move Views">
+      <div ref={tabsContainerRef}>
+        <nav 
+          ref={tabsRef}
+          className={`my-moves-tabs ${isTabsSticky ? 'my-moves-tabs--fixed' : ''}`}
+          role="tablist" 
+          aria-label="Move Views"
+        >
         <button
           type="button"
           role="tab"
@@ -257,6 +288,7 @@ export const ExploreScreen = ({
           Saved
         </button>
       </nav>
+      </div>
 
       <section className="explore-tools">
         <div className={`search-and-filters ${isSearchFocused ? 'search-focused' : ''}`}>
