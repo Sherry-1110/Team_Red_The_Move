@@ -53,24 +53,25 @@ export const MoveDetailScreen = ({
   const displayLocation = move.locationName || move.location;
   const mapsHref = move.locationUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLocation)}`;
   const isPast = new Date(move.endTime).getTime() < now;
-  const attendeeInitials = useMemo(
+  const attendeeItems = useMemo(
     () =>
-      move.attendees.map((attendee) =>
-        attendee
+      move.attendees.map((attendee) => ({
+        name: attendee,
+        initials: attendee
           .split(' ')
           .filter(Boolean)
           .map((part) => part[0])
           .slice(0, 2)
           .join('')
           .toUpperCase(),
-      ),
+      })),
     [move.attendees],
   );
   const shouldLimitAttendees = move.maxParticipants > 10;
   const visibleAttendeeCount = shouldLimitAttendees
-    ? Math.min(10, attendeeInitials.length)
-    : attendeeInitials.length;
-  const remainingAttendeeCount = attendeeInitials.length - visibleAttendeeCount;
+    ? Math.min(10, attendeeItems.length)
+    : attendeeItems.length;
+  const remainingAttendeeCount = attendeeItems.length - visibleAttendeeCount;
   const activityIcons: Record<ActivityType, ReactElement> = {
     Food: <UtensilsCrossed size={14} />,
     Study: <BookOpen size={14} />,
@@ -213,12 +214,14 @@ export const MoveDetailScreen = ({
           </div>
           {move.attendees.includes(userName) ? (
             <div className="detail__avatars">
-              {attendeeInitials.slice(0, visibleAttendeeCount).map((initials, index) => (
+              {attendeeItems.slice(0, visibleAttendeeCount).map((attendee, index) => (
                 <span
-                  key={`${initials}-${index}`}
+                  key={`${attendee.name}-${index}`}
                   className="detail__avatar detail__avatar--filled"
+                  data-tooltip={attendee.name}
+                  aria-label={attendee.name}
                 >
-                  {initials}
+                  {attendee.initials}
                 </span>
               ))}
               {remainingAttendeeCount > 0 && (

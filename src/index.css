@@ -1473,6 +1473,7 @@ img {
   justify-content: center;
   font-weight: 700;
   font-size: 0.75rem;
+  position: relative;
 }
 
 .detail__avatar--filled {
@@ -1483,6 +1484,35 @@ img {
 .detail__avatar--empty {
   background: #efedf3;
   color: #b9b0c6;
+}
+
+.detail__avatar[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f1a2b;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(31, 26, 43, 0.2);
+  z-index: 20;
+}
+
+.detail__avatar[data-tooltip]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #1f1a2b transparent transparent transparent;
+  z-index: 20;
 }
 
 .detail__buttons {
