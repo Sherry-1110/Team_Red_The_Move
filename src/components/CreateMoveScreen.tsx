@@ -68,10 +68,38 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
   const [isFetchingPredictions, setIsFetchingPredictions] = useState(false);
   const [isResolvingPlace, setIsResolvingPlace] = useState(false);
   const [resolvedAddress, setResolvedAddress] = useState('');
+  const [startHourInput, setStartHourInput] = useState('12');
+  const [startMinuteInput, setStartMinuteInput] = useState('00');
+  const [endHourInput, setEndHourInput] = useState('1');
+  const [endMinuteInput, setEndMinuteInput] = useState('00');
+  const [isStartHourFocused, setIsStartHourFocused] = useState(false);
+  const [isStartMinuteFocused, setIsStartMinuteFocused] = useState(false);
+  const [isEndHourFocused, setIsEndHourFocused] = useState(false);
+  const [isEndMinuteFocused, setIsEndMinuteFocused] = useState(false);
   const [isActivityMenuOpen, setIsActivityMenuOpen] = useState(false);
   const [isAreaMenuOpen, setIsAreaMenuOpen] = useState(false);
   const activityMenuRef = useRef<HTMLDivElement | null>(null);
   const areaMenuRef = useRef<HTMLDivElement | null>(null);
+  const startMinuteRef = useRef<HTMLInputElement | null>(null);
+  const endMinuteRef = useRef<HTMLInputElement | null>(null);
+  const parseTimeParts = (value: string) => {
+    const [hoursRaw, minutesRaw] = value.split(':');
+    const hours24 = Number(hoursRaw);
+    const minutes = Number(minutesRaw ?? '0');
+    const safeHours24 = Number.isFinite(hours24) ? hours24 : 0;
+    const safeMinutes = Number.isFinite(minutes) ? minutes : 0;
+    const hour12 = safeHours24 % 12 === 0 ? 12 : safeHours24 % 12;
+    const period = safeHours24 < 12 ? 'AM' : 'PM';
+    return { hour12, minute: safeMinutes, period };
+  };
+  const toTimeValue = (hour12: number, minute: number, period: 'AM' | 'PM') => {
+    const normalizedHour = Math.min(12, Math.max(1, Math.round(hour12)));
+    const normalizedMinute = Math.min(59, Math.max(0, Math.round(minute)));
+    const hours24 = period === 'AM'
+      ? normalizedHour % 12
+      : normalizedHour % 12 + 12;
+    return `${String(hours24).padStart(2, '0')}:${String(normalizedMinute).padStart(2, '0')}`;
+  };
 
   const validateAndSetStartTime = (datePart: string, timePart: string, isTimeChange: boolean = false) => {
     const candidate = `${datePart}T${timePart}`;
@@ -297,6 +325,35 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
     }
   };
 
+  const startDatePart = getDatePart(formState.startTime);
+  const endDatePart = getDatePart(formState.endTime);
+  const startTimePart = getTimePart(formState.startTime);
+  const endTimePart = getTimePart(formState.endTime);
+  const todayDate = getLocalDateString(new Date());
+  const nowTime = getLocalTimeString(new Date());
+  const isStartDateToday = startDatePart === todayDate;
+  const isEndDateSameAsStart = endDatePart === startDatePart;
+  const startParts = parseTimeParts(startTimePart);
+  const endParts = parseTimeParts(endTimePart);
+
+  useEffect(() => {
+    if (!isStartHourFocused) {
+      setStartHourInput(String(startParts.hour12));
+    }
+    if (!isStartMinuteFocused) {
+      setStartMinuteInput(String(startParts.minute).padStart(2, '0'));
+    }
+  }, [startParts.hour12, startParts.minute, startParts.period, isStartHourFocused, isStartMinuteFocused]);
+
+  useEffect(() => {
+    if (!isEndHourFocused) {
+      setEndHourInput(String(endParts.hour12));
+    }
+    if (!isEndMinuteFocused) {
+      setEndMinuteInput(String(endParts.minute).padStart(2, '0'));
+    }
+  }, [endParts.hour12, endParts.minute, endParts.period, isEndHourFocused, isEndMinuteFocused]);
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <section className="create-panel modal-panel" onClick={(e) => e.stopPropagation()}>
@@ -408,7 +465,7 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
             </span>
             <input
               type="date"
-              value={getDatePart(formState.startTime)}
+              value={startDatePart}
               onChange={(event) => {
                 const nextDate = event.target.value;
                 const timePart = getTimePart(formState.startTime);
@@ -421,16 +478,100 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
             <span className="form-label">
               Start Time <span className="form-required">*</span>
             </span>
-            <input
-              type="time"
-              value={getTimePart(formState.startTime)}
-              onChange={(event) => {
-                const nextTime = event.target.value;
-                const datePart = getDatePart(formState.startTime);
-                validateAndSetStartTime(datePart, nextTime, true);
-              }}
-              required
-            />
+            <div className="time-inputs">
+              <input
+                className="time-input time-input--hour"
+                type="text"
+                inputMode="numeric"
+                value={startHourInput}
+                onFocus={() => setIsStartHourFocused(true)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    startMinuteRef.current?.focus();
+                    startMinuteRef.current?.select();
+                  }
+                }}
+                onChange={(event) => {
+                  const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                  if (nextRaw.length > 2) return;
+                  setStartHourInput(nextRaw);
+                  if (nextRaw === '') return;
+                  const nextHour = Number(nextRaw);
+                  if (!Number.isFinite(nextHour)) return;
+                  const nextTime = toTimeValue(
+                    nextHour,
+                    Number(startMinuteInput || startParts.minute),
+                    startParts.period as 'AM' | 'PM',
+                  );
+                  const isDisabled = isStartDateToday && nextTime < nowTime;
+                  if (isDisabled) return;
+                  validateAndSetStartTime(startDatePart, nextTime, true);
+                }}
+                onBlur={() => {
+                  setIsStartHourFocused(false);
+                  if (startHourInput.trim() === '') {
+                    setStartHourInput(String(startParts.hour12));
+                  }
+                }}
+                aria-label="Start hour"
+              />
+              <span className="time-input__separator">:</span>
+              <input
+                className="time-input time-input--minute"
+                type="text"
+                inputMode="numeric"
+                value={startMinuteInput}
+                ref={startMinuteRef}
+                onFocus={() => setIsStartMinuteFocused(true)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    event.currentTarget.blur();
+                  }
+                }}
+                onChange={(event) => {
+                  const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                  if (nextRaw.length > 2) return;
+                  setStartMinuteInput(nextRaw);
+                  if (nextRaw === '') return;
+                  const nextMinute = Number(nextRaw);
+                  if (!Number.isFinite(nextMinute)) return;
+                  const nextTime = toTimeValue(
+                    Number(startHourInput || startParts.hour12),
+                    nextMinute,
+                    startParts.period as 'AM' | 'PM',
+                  );
+                  const isDisabled = isStartDateToday && nextTime < nowTime;
+                  if (isDisabled) return;
+                  validateAndSetStartTime(startDatePart, nextTime, true);
+                }}
+                onBlur={() => {
+                  setIsStartMinuteFocused(false);
+                  if (startMinuteInput.trim() === '') {
+                    setStartMinuteInput(String(startParts.minute).padStart(2, '0'));
+                  }
+                }}
+                aria-label="Start minutes"
+              />
+              <div className="time-input__period">
+                {(['AM', 'PM'] as const).map((period) => (
+                  <button
+                    key={`start-${period}`}
+                    type="button"
+                    className={`time-pill${startParts.period === period ? ' is-selected' : ''}`}
+                    onClick={() => {
+                      const nextTime = toTimeValue(startParts.hour12, startParts.minute, period);
+                      const isDisabled = isStartDateToday && nextTime < nowTime;
+                      if (isDisabled) return;
+                      validateAndSetStartTime(startDatePart, nextTime, true);
+                    }}
+                  >
+                    {period}
+                  </button>
+                ))}
+              </div>
+            </div>
           </label>
         </div>
         {startTimeWarning && <p className="form-error">{startTimeWarning}</p>}
@@ -441,7 +582,7 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
             </span>
             <input
               type="date"
-              value={getDatePart(formState.endTime)}
+              value={endDatePart}
               onChange={(event) => {
                 const nextDate = event.target.value;
                 const timePart = getTimePart(formState.endTime);
@@ -454,16 +595,100 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
             <span className="form-label">
               End Time <span className="form-required">*</span>
             </span>
-            <input
-              type="time"
-              value={getTimePart(formState.endTime)}
-              onChange={(event) => {
-                const nextTime = event.target.value;
-                const datePart = getDatePart(formState.endTime);
-                validateAndSetEndTime(datePart, nextTime);
-              }}
-              required
-            />
+            <div className="time-inputs">
+              <input
+                className="time-input time-input--hour"
+                type="text"
+                inputMode="numeric"
+                value={endHourInput}
+                onFocus={() => setIsEndHourFocused(true)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    endMinuteRef.current?.focus();
+                    endMinuteRef.current?.select();
+                  }
+                }}
+                onChange={(event) => {
+                  const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                  if (nextRaw.length > 2) return;
+                  setEndHourInput(nextRaw);
+                  if (nextRaw === '') return;
+                  const nextHour = Number(nextRaw);
+                  if (!Number.isFinite(nextHour)) return;
+                  const nextTime = toTimeValue(
+                    nextHour,
+                    Number(endMinuteInput || endParts.minute),
+                    endParts.period as 'AM' | 'PM',
+                  );
+                  const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
+                  if (isDisabled) return;
+                  validateAndSetEndTime(endDatePart, nextTime);
+                }}
+                onBlur={() => {
+                  setIsEndHourFocused(false);
+                  if (endHourInput.trim() === '') {
+                    setEndHourInput(String(endParts.hour12));
+                  }
+                }}
+                aria-label="End hour"
+              />
+              <span className="time-input__separator">:</span>
+              <input
+                className="time-input time-input--minute"
+                type="text"
+                inputMode="numeric"
+                value={endMinuteInput}
+                ref={endMinuteRef}
+                onFocus={() => setIsEndMinuteFocused(true)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    event.currentTarget.blur();
+                  }
+                }}
+                onChange={(event) => {
+                  const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                  if (nextRaw.length > 2) return;
+                  setEndMinuteInput(nextRaw);
+                  if (nextRaw === '') return;
+                  const nextMinute = Number(nextRaw);
+                  if (!Number.isFinite(nextMinute)) return;
+                  const nextTime = toTimeValue(
+                    Number(endHourInput || endParts.hour12),
+                    nextMinute,
+                    endParts.period as 'AM' | 'PM',
+                  );
+                  const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
+                  if (isDisabled) return;
+                  validateAndSetEndTime(endDatePart, nextTime);
+                }}
+                onBlur={() => {
+                  setIsEndMinuteFocused(false);
+                  if (endMinuteInput.trim() === '') {
+                    setEndMinuteInput(String(endParts.minute).padStart(2, '0'));
+                  }
+                }}
+                aria-label="End minutes"
+              />
+              <div className="time-input__period">
+                {(['AM', 'PM'] as const).map((period) => (
+                  <button
+                    key={`end-${period}`}
+                    type="button"
+                    className={`time-pill${endParts.period === period ? ' is-selected' : ''}`}
+                    onClick={() => {
+                      const nextTime = toTimeValue(endParts.hour12, endParts.minute, period);
+                      const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
+                      if (isDisabled) return;
+                      validateAndSetEndTime(endDatePart, nextTime);
+                    }}
+                  >
+                    {period}
+                  </button>
+                ))}
+              </div>
+            </div>
           </label>
         </div>
         {endTimeWarning && <p className="form-error">{endTimeWarning}</p>}
