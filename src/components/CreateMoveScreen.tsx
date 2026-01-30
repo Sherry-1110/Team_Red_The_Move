@@ -458,7 +458,15 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
             </ul>
           )}
         </div>
-        <div className="form-row">
+        <div className="form-row-labels">
+          <span className="form-label">
+            Start Date <span className="form-required">*</span>
+          </span>
+          <span className="form-label">
+            Start Time <span className="form-required">*</span>
+          </span>
+        </div>
+        <div className="form-row form-row--time">
           <label>
             <span className="form-label">
               Start Date <span className="form-required">*</span>
@@ -478,83 +486,85 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
             <span className="form-label">
               Start Time <span className="form-required">*</span>
             </span>
-            <div className="time-inputs">
-              <input
-                className="time-input time-input--hour"
-                type="text"
-                inputMode="numeric"
-                value={startHourInput}
-                onFocus={() => setIsStartHourFocused(true)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault();
-                    startMinuteRef.current?.focus();
-                    startMinuteRef.current?.select();
-                  }
-                }}
-                onChange={(event) => {
-                  const nextRaw = event.target.value.replace(/[^\d]/g, '');
-                  if (nextRaw.length > 2) return;
-                  setStartHourInput(nextRaw);
-                  if (nextRaw === '') return;
-                  const nextHour = Number(nextRaw);
-                  if (!Number.isFinite(nextHour)) return;
-                  const nextTime = toTimeValue(
-                    nextHour,
-                    Number(startMinuteInput || startParts.minute),
-                    startParts.period as 'AM' | 'PM',
-                  );
-                  const isDisabled = isStartDateToday && nextTime < nowTime;
-                  if (isDisabled) return;
-                  validateAndSetStartTime(startDatePart, nextTime, true);
-                }}
-                onBlur={() => {
-                  setIsStartHourFocused(false);
-                  if (startHourInput.trim() === '') {
-                    setStartHourInput(String(startParts.hour12));
-                  }
-                }}
-                aria-label="Start hour"
-              />
-              <span className="time-input__separator">:</span>
-              <input
-                className="time-input time-input--minute"
-                type="text"
-                inputMode="numeric"
-                value={startMinuteInput}
-                ref={startMinuteRef}
-                onFocus={() => setIsStartMinuteFocused(true)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault();
-                    event.currentTarget.blur();
-                  }
-                }}
-                onChange={(event) => {
-                  const nextRaw = event.target.value.replace(/[^\d]/g, '');
-                  if (nextRaw.length > 2) return;
-                  setStartMinuteInput(nextRaw);
-                  if (nextRaw === '') return;
-                  const nextMinute = Number(nextRaw);
-                  if (!Number.isFinite(nextMinute)) return;
-                  const nextTime = toTimeValue(
-                    Number(startHourInput || startParts.hour12),
-                    nextMinute,
-                    startParts.period as 'AM' | 'PM',
-                  );
-                  const isDisabled = isStartDateToday && nextTime < nowTime;
-                  if (isDisabled) return;
-                  validateAndSetStartTime(startDatePart, nextTime, true);
-                }}
-                onBlur={() => {
-                  setIsStartMinuteFocused(false);
-                  if (startMinuteInput.trim() === '') {
-                    setStartMinuteInput(String(startParts.minute).padStart(2, '0'));
-                  }
-                }}
-                aria-label="Start minutes"
-              />
-              <div className="time-input__period">
+            <div className="time-box">
+              <div className="time-inputs">
+                <input
+                  className="time-input time-input--hour"
+                  type="text"
+                  inputMode="numeric"
+                  value={startHourInput}
+                  onFocus={() => setIsStartHourFocused(true)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      startMinuteRef.current?.focus();
+                      startMinuteRef.current?.select();
+                    }
+                  }}
+                  onChange={(event) => {
+                    const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                    if (nextRaw.length > 2) return;
+                    setStartHourInput(nextRaw);
+                    if (nextRaw === '') return;
+                    const nextHour = Number(nextRaw);
+                    if (!Number.isFinite(nextHour)) return;
+                    const nextTime = toTimeValue(
+                      nextHour,
+                      Number(startMinuteInput || startParts.minute),
+                      startParts.period as 'AM' | 'PM',
+                    );
+                    const isDisabled = isStartDateToday && nextTime < nowTime;
+                    if (isDisabled) return;
+                    validateAndSetStartTime(startDatePart, nextTime, true);
+                  }}
+                  onBlur={() => {
+                    setIsStartHourFocused(false);
+                    if (startHourInput.trim() === '') {
+                      setStartHourInput(String(startParts.hour12));
+                    }
+                  }}
+                  aria-label="Start hour"
+                />
+                <span className="time-input__separator">:</span>
+                <input
+                  className="time-input time-input--minute"
+                  type="text"
+                  inputMode="numeric"
+                  value={startMinuteInput}
+                  ref={startMinuteRef}
+                  onFocus={() => setIsStartMinuteFocused(true)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      event.currentTarget.blur();
+                    }
+                  }}
+                  onChange={(event) => {
+                    const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                    if (nextRaw.length > 2) return;
+                    setStartMinuteInput(nextRaw);
+                    if (nextRaw === '') return;
+                    const nextMinute = Number(nextRaw);
+                    if (!Number.isFinite(nextMinute)) return;
+                    const nextTime = toTimeValue(
+                      Number(startHourInput || startParts.hour12),
+                      nextMinute,
+                      startParts.period as 'AM' | 'PM',
+                    );
+                    const isDisabled = isStartDateToday && nextTime < nowTime;
+                    if (isDisabled) return;
+                    validateAndSetStartTime(startDatePart, nextTime, true);
+                  }}
+                  onBlur={() => {
+                    setIsStartMinuteFocused(false);
+                    if (startMinuteInput.trim() === '') {
+                      setStartMinuteInput(String(startParts.minute).padStart(2, '0'));
+                    }
+                  }}
+                  aria-label="Start minutes"
+                />
+              </div>
+              <div className="time-input__period time-input__period--stacked">
                 {(['AM', 'PM'] as const).map((period) => (
                   <button
                     key={`start-${period}`}
@@ -575,7 +585,15 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
           </label>
         </div>
         {startTimeWarning && <p className="form-error">{startTimeWarning}</p>}
-        <div className="form-row">
+        <div className="form-row-labels">
+          <span className="form-label">
+            End Date <span className="form-required">*</span>
+          </span>
+          <span className="form-label">
+            End Time <span className="form-required">*</span>
+          </span>
+        </div>
+        <div className="form-row form-row--time">
           <label>
             <span className="form-label">
               End Date <span className="form-required">*</span>
@@ -595,83 +613,85 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
             <span className="form-label">
               End Time <span className="form-required">*</span>
             </span>
-            <div className="time-inputs">
-              <input
-                className="time-input time-input--hour"
-                type="text"
-                inputMode="numeric"
-                value={endHourInput}
-                onFocus={() => setIsEndHourFocused(true)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault();
-                    endMinuteRef.current?.focus();
-                    endMinuteRef.current?.select();
-                  }
-                }}
-                onChange={(event) => {
-                  const nextRaw = event.target.value.replace(/[^\d]/g, '');
-                  if (nextRaw.length > 2) return;
-                  setEndHourInput(nextRaw);
-                  if (nextRaw === '') return;
-                  const nextHour = Number(nextRaw);
-                  if (!Number.isFinite(nextHour)) return;
-                  const nextTime = toTimeValue(
-                    nextHour,
-                    Number(endMinuteInput || endParts.minute),
-                    endParts.period as 'AM' | 'PM',
-                  );
-                  const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
-                  if (isDisabled) return;
-                  validateAndSetEndTime(endDatePart, nextTime);
-                }}
-                onBlur={() => {
-                  setIsEndHourFocused(false);
-                  if (endHourInput.trim() === '') {
-                    setEndHourInput(String(endParts.hour12));
-                  }
-                }}
-                aria-label="End hour"
-              />
-              <span className="time-input__separator">:</span>
-              <input
-                className="time-input time-input--minute"
-                type="text"
-                inputMode="numeric"
-                value={endMinuteInput}
-                ref={endMinuteRef}
-                onFocus={() => setIsEndMinuteFocused(true)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault();
-                    event.currentTarget.blur();
-                  }
-                }}
-                onChange={(event) => {
-                  const nextRaw = event.target.value.replace(/[^\d]/g, '');
-                  if (nextRaw.length > 2) return;
-                  setEndMinuteInput(nextRaw);
-                  if (nextRaw === '') return;
-                  const nextMinute = Number(nextRaw);
-                  if (!Number.isFinite(nextMinute)) return;
-                  const nextTime = toTimeValue(
-                    Number(endHourInput || endParts.hour12),
-                    nextMinute,
-                    endParts.period as 'AM' | 'PM',
-                  );
-                  const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
-                  if (isDisabled) return;
-                  validateAndSetEndTime(endDatePart, nextTime);
-                }}
-                onBlur={() => {
-                  setIsEndMinuteFocused(false);
-                  if (endMinuteInput.trim() === '') {
-                    setEndMinuteInput(String(endParts.minute).padStart(2, '0'));
-                  }
-                }}
-                aria-label="End minutes"
-              />
-              <div className="time-input__period">
+            <div className="time-box">
+              <div className="time-inputs">
+                <input
+                  className="time-input time-input--hour"
+                  type="text"
+                  inputMode="numeric"
+                  value={endHourInput}
+                  onFocus={() => setIsEndHourFocused(true)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      endMinuteRef.current?.focus();
+                      endMinuteRef.current?.select();
+                    }
+                  }}
+                  onChange={(event) => {
+                    const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                    if (nextRaw.length > 2) return;
+                    setEndHourInput(nextRaw);
+                    if (nextRaw === '') return;
+                    const nextHour = Number(nextRaw);
+                    if (!Number.isFinite(nextHour)) return;
+                    const nextTime = toTimeValue(
+                      nextHour,
+                      Number(endMinuteInput || endParts.minute),
+                      endParts.period as 'AM' | 'PM',
+                    );
+                    const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
+                    if (isDisabled) return;
+                    validateAndSetEndTime(endDatePart, nextTime);
+                  }}
+                  onBlur={() => {
+                    setIsEndHourFocused(false);
+                    if (endHourInput.trim() === '') {
+                      setEndHourInput(String(endParts.hour12));
+                    }
+                  }}
+                  aria-label="End hour"
+                />
+                <span className="time-input__separator">:</span>
+                <input
+                  className="time-input time-input--minute"
+                  type="text"
+                  inputMode="numeric"
+                  value={endMinuteInput}
+                  ref={endMinuteRef}
+                  onFocus={() => setIsEndMinuteFocused(true)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      event.currentTarget.blur();
+                    }
+                  }}
+                  onChange={(event) => {
+                    const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                    if (nextRaw.length > 2) return;
+                    setEndMinuteInput(nextRaw);
+                    if (nextRaw === '') return;
+                    const nextMinute = Number(nextRaw);
+                    if (!Number.isFinite(nextMinute)) return;
+                    const nextTime = toTimeValue(
+                      Number(endHourInput || endParts.hour12),
+                      nextMinute,
+                      endParts.period as 'AM' | 'PM',
+                    );
+                    const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
+                    if (isDisabled) return;
+                    validateAndSetEndTime(endDatePart, nextTime);
+                  }}
+                  onBlur={() => {
+                    setIsEndMinuteFocused(false);
+                    if (endMinuteInput.trim() === '') {
+                      setEndMinuteInput(String(endParts.minute).padStart(2, '0'));
+                    }
+                  }}
+                  aria-label="End minutes"
+                />
+              </div>
+              <div className="time-input__period time-input__period--stacked">
                 {(['AM', 'PM'] as const).map((period) => (
                   <button
                     key={`end-${period}`}
