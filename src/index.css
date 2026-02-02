@@ -1603,6 +1603,72 @@ img {
   flex-shrink: 0;
 }
 
+.location-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.location-link:hover {
+  opacity: 0.7;
+}
+
+.directions-arrow {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.2em;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.directions-arrow:hover {
+  opacity: 0.7;
+  transform: translateX(2px);
+}
+
+.confirm-modal {
+  text-align: center;
+  max-width: 400px;
+  background-color: white;
+  padding: 24px 28px;
+  border-radius: 16px;
+}
+
+.confirm-modal h3 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  color: var(--plum);
+}
+
+.confirm-modal p {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.confirm-modal__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.confirm-modal__actions .btn {
+  flex: 1;
+  min-width: 100px;
+}
+
 
 .detail__meta {
   display: grid;
@@ -2492,6 +2558,7 @@ img {
     width: calc(100vw - 24px);
     max-height: 85vh;
     padding: 16px;
+    background: white;
   }
 
   .panel-heading h2 {

@@ -41,6 +41,7 @@ export const MoveDetailScreen = ({
   onClose,
 }: MoveDetailScreenProps) => {
   const [commentDraft, setCommentDraft] = useState('');
+  const [showDirectionsConfirm, setShowDirectionsConfirm] = useState(false);
   const { isSaved, toggleSave } = useSavedMoves();
 
   const handleAddComment = () => {
@@ -182,10 +183,23 @@ export const MoveDetailScreen = ({
             <div className="detail__info-row">
               <MapPin size={14} />
               <span>
-                {displayLocation}{' '}
-                <a className="inline-link" href={mapsHref} target="_blank" rel="noreferrer">
-                  (Directions)
-                </a>
+                <button
+                  type="button"
+                  className="location-link"
+                  onClick={() => setShowDirectionsConfirm(true)}
+                  aria-label={`Open directions to ${displayLocation}`}
+                >
+                  {displayLocation}
+                </button>
+                {' '}
+                <button
+                  type="button"
+                  className="directions-arrow"
+                  onClick={() => setShowDirectionsConfirm(true)}
+                  aria-label={`Open directions to ${displayLocation}`}
+                >
+                  →
+                </button>
               </span>
             </div>
             <div className="detail__info-row">
@@ -297,6 +311,33 @@ export const MoveDetailScreen = ({
           </div>
         </div>
       </div>
+      {showDirectionsConfirm && (
+        <div className="modal-overlay" role="alertdialog" aria-modal="true" onClick={() => setShowDirectionsConfirm(false)}>
+          <div className="modal-panel confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Leave The Move?</h3>
+            <p>You're about to navigate to Google Maps for directions.</p>
+            <div className="confirm-modal__actions">
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => setShowDirectionsConfirm(false)}
+              >
+                No
+              </button>
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={() => {
+                  window.open(mapsHref, '_blank', 'noopener,noreferrer');
+                  setShowDirectionsConfirm(false);
+                }}
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
