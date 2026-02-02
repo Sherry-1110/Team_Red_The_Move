@@ -52,7 +52,8 @@ export const MoveDetailScreen = ({
   };
 
   const displayLocation = move.locationName || move.location;
-  const mapsHref = move.locationUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLocation)}`;
+  /* Use address-based search so Google Maps reliably finds the place; place_id in locationUrl can fail to resolve */
+  const mapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayLocation)}`;
   const isPast = new Date(move.endTime).getTime() < now;
   const attendeeItems = useMemo(
     () =>
