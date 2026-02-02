@@ -765,13 +765,16 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
                           aria-selected={activity === formState.activityType}
                           className={`sort-option${activity === formState.activityType ? ' sort-option--active' : ''
                             }`}
-                          onClick={() => {
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             setFormState((prev) => ({
                               ...prev,
-                              activityType: activity,
+                              activityType: activity as ActivityType,
                             }));
                             setIsActivityMenuOpen(false);
                           }}
+                          onClick={(e) => e.stopPropagation()}
                         >
                           {activity}
                         </button>
@@ -796,7 +799,7 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
                     setIsActivityMenuOpen(false);
                   }}
                 >
-                {AREA_LABELS[formState.area]}
+                  {AREA_LABELS[formState.area]}
                 </button>
                 {isAreaMenuOpen && (
                   <div className="form-select__menu" role="listbox">
@@ -807,15 +810,18 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
                         role="option"
                         aria-selected={area === formState.area}
                         className={`sort-option${area === formState.area ? ' sort-option--active' : ''}`}
-                        onClick={() => {
-                          setFormState((prev) => ({ ...prev, area }));
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setFormState((prev) => ({ ...prev, area: area as CampusArea }));
                           setIsAreaMenuOpen(false);
                         }}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {AREA_LABELS[area]}
                       </button>
                     ))}
-                </div>
+                  </div>
                 )}
               </div>
             </label>
