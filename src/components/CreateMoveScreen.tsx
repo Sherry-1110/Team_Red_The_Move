@@ -107,34 +107,34 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
     const nowValue = new Date();
     nowValue.setSeconds(0, 0);
     const nowTime = nowValue.getTime();
-    if (Number.isNaN(candidateTime) || candidateTime < nowTime) {
-      const fallback = toLocalDateTimeValue(nowValue);
+    const isInvalid = Number.isNaN(candidateTime) || candidateTime < nowTime;
+    if (isInvalid) {
       setStartTimeWarning('Start time must be in the future.');
-      setFormState((prev) => ({ ...prev, startTime: fallback }));
-      return;
+    } else {
+      setStartTimeWarning('');
     }
-    setStartTimeWarning('');
-    
-    // Update start time
+    // Always update to user's choice when toggling AM/PM so the button visibly switches
+    const startTimeToSet = isInvalid && !isTimeChange ? toLocalDateTimeValue(nowValue) : candidate;
+
     setFormState((prev) => {
-      const newState = { ...prev, startTime: candidate };
-      
+      const newState = { ...prev, startTime: startTimeToSet };
+
       // Auto-update end date to match start date if they're different
       const currentEndDate = getDatePart(prev.endTime);
       if (currentEndDate !== datePart) {
         const currentEndTime = getTimePart(prev.endTime);
         newState.endTime = `${datePart}T${currentEndTime}`;
       }
-      
-      // Auto-update end time to be one hour after start time when start time changes
+
+      // Auto-update end time to one hour after start time when start time changes
       if (isTimeChange) {
-        const startDate = new Date(candidate);
+        const startDate = new Date(startTimeToSet);
         const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // Add one hour
         const endDatePart = getDatePart(newState.endTime); // Use the updated end date
         const newEndTime = getLocalTimeString(endDate);
         newState.endTime = `${endDatePart}T${newEndTime}`;
       }
-      
+
       return newState;
     });
   };
@@ -144,15 +144,14 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
     const candidateTime = new Date(candidate).getTime();
     const nowValue = new Date();
     nowValue.setSeconds(0, 0);
-    const oneHourLater = new Date(nowValue.getTime() + 60 * 60 * 1000);
     const nowTime = nowValue.getTime();
-    if (Number.isNaN(candidateTime) || candidateTime < nowTime) {
-      const fallback = toLocalDateTimeValue(oneHourLater);
+    const isInvalid = Number.isNaN(candidateTime) || candidateTime < nowTime;
+    if (isInvalid) {
       setEndTimeWarning('End time must be in the future.');
-      setFormState((prev) => ({ ...prev, endTime: fallback }));
-      return;
+    } else {
+      setEndTimeWarning('');
     }
-    setEndTimeWarning('');
+    // Always update to candidate so AM/PM toggle is visible; submit will block if invalid
     setFormState((prev) => ({ ...prev, endTime: candidate }));
   };
 
@@ -250,7 +249,7 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
       setPredictions([]);
       setResolvedAddress('');
       setFormState((prev) => ({ ...prev, latitude: undefined, longitude: undefined }));
-      return () => {};
+      return () => { };
     }
 
     let canceled = false;
@@ -383,474 +382,467 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
             </button>
           )}
         </div>
-      <form className="form" onSubmit={handleSubmit}>
-        <label>
-          <span className="form-label">
-            Title <span className="form-required">*</span>
-          </span>
-          <input
-            type="text"
-            value={formState.title}
-            onChange={(event) => {
-              const nextTitle = event.target.value;
-              const trimmedTitle = nextTitle.slice(0, 50);
-              setFormState((prev) => ({ ...prev, title: trimmedTitle }));
-              setTitleWarning(
-                nextTitle.length > 50 ? 'Title must be 50 characters or fewer.' : '',
-              );
-            }}
-            placeholder="Pickup soccer on Tech Lawn"
-            required
-          />
-          {titleWarning && <p className="form-error">{titleWarning}</p>}
-        </label>
-        <label>
-          <span>Description</span>
-          <textarea
-            rows={1}
-            className="form-textarea--single"
-            value={formState.description}
-            onChange={(event) =>
-              setFormState((prev) => ({ ...prev, description: event.target.value }))
-            }
-            placeholder="What&apos;s the vibe? What should people bring?"
-          />
-        </label>
-        <label>
-          <span className="form-label">
-            Location <span className="form-required">*</span>
-          </span>
-          <span className="form-helper">
-            <em>
-              Location must be a street address or building name; add specific details in the
-              description.
-            </em>
-          </span>
-          <input
-            type="text"
-            value={formState.location}
-            onChange={(event) =>
-              setFormState((prev) => ({ ...prev, location: event.target.value }))
-            }
-            placeholder="Search Evanston buildings or places"
-            required
-          />
-        </label>
-        <div className="suggestions">
-          {!resolvedAddress && isFetchingPredictions && (
-            <p className="helper-text">Searching nearby Evanston spots...</p>
-          )}
-          {!resolvedAddress && predictionError && <p className="form-error">{predictionError}</p>}
-          {!resolvedAddress && predictions.length > 0 && (
-            <ul className="suggestion-list">
-              {predictions.map((prediction) => (
-                <li key={prediction.placeId}>
-                  <button
-                    type="button"
-                    className="suggestion-item"
-                    onClick={() => handleSelectPrediction(prediction)}
-                    disabled={isResolvingPlace}
-                  >
-                    {prediction.description}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <div className="form-row-labels">
-          <span className="form-label">
-            Start Date <span className="form-required">*</span>
-          </span>
-          <span className="form-label">
-            Start Time <span className="form-required">*</span>
-          </span>
-        </div>
-        <div className="form-row form-row--time">
+        <form className="form" onSubmit={handleSubmit}>
           <label>
             <span className="form-label">
-              Start Date <span className="form-required">*</span>
+              Title <span className="form-required">*</span>
             </span>
             <input
-              type="date"
-              value={startDatePart}
+              type="text"
+              value={formState.title}
               onChange={(event) => {
-                const nextDate = event.target.value;
-                const timePart = getTimePart(formState.startTime);
-                validateAndSetStartTime(nextDate, timePart);
+                const nextTitle = event.target.value;
+                const trimmedTitle = nextTitle.slice(0, 50);
+                setFormState((prev) => ({ ...prev, title: trimmedTitle }));
+                setTitleWarning(
+                  nextTitle.length > 50 ? 'Title must be 50 characters or fewer.' : '',
+                );
               }}
+              placeholder="Pickup soccer on Tech Lawn"
               required
+            />
+            {titleWarning && <p className="form-error">{titleWarning}</p>}
+          </label>
+          <label>
+            <span>Description</span>
+            <textarea
+              rows={1}
+              className="form-textarea--single"
+              value={formState.description}
+              onChange={(event) =>
+                setFormState((prev) => ({ ...prev, description: event.target.value }))
+              }
+              placeholder="What&apos;s the vibe? What should people bring?"
             />
           </label>
           <label>
             <span className="form-label">
+              Location <span className="form-required">*</span>
+            </span>
+            <span className="form-helper">
+              <em>
+                Location must be a street address or building name; add specific details in the
+                description.
+              </em>
+            </span>
+            <input
+              type="text"
+              value={formState.location}
+              onChange={(event) =>
+                setFormState((prev) => ({ ...prev, location: event.target.value }))
+              }
+              placeholder="Search Evanston buildings or places"
+              required
+            />
+          </label>
+          <div className="suggestions">
+            {!resolvedAddress && isFetchingPredictions && (
+              <p className="helper-text">Searching nearby Evanston spots...</p>
+            )}
+            {!resolvedAddress && predictionError && <p className="form-error">{predictionError}</p>}
+            {!resolvedAddress && predictions.length > 0 && (
+              <ul className="suggestion-list">
+                {predictions.map((prediction) => (
+                  <li key={prediction.placeId}>
+                    <button
+                      type="button"
+                      className="suggestion-item"
+                      onClick={() => handleSelectPrediction(prediction)}
+                      disabled={isResolvingPlace}
+                    >
+                      {prediction.description}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="form-row-labels">
+            <span className="form-label">
+              Start Date <span className="form-required">*</span>
+            </span>
+            <span className="form-label">
               Start Time <span className="form-required">*</span>
             </span>
-            <div className="time-box">
-              <div className="time-inputs">
-                <input
-                  className="time-input time-input--hour"
-                  type="text"
-                  inputMode="numeric"
-                  value={startHourInput}
-                  onFocus={() => setIsStartHourFocused(true)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      startMinuteRef.current?.focus();
-                      startMinuteRef.current?.select();
-                    }
-                  }}
-                  onChange={(event) => {
-                    const nextRaw = event.target.value.replace(/[^\d]/g, '');
-                    if (nextRaw.length > 2) return;
-                    setStartHourInput(nextRaw);
-                    if (nextRaw === '') return;
-                    const nextHour = Number(nextRaw);
-                    if (!Number.isFinite(nextHour)) return;
-                    const nextTime = toTimeValue(
-                      nextHour,
-                      Number(startMinuteInput || startParts.minute),
-                      startParts.period as 'AM' | 'PM',
-                    );
-                    const isDisabled = isStartDateToday && nextTime < nowTime;
-                    if (isDisabled) return;
-                    validateAndSetStartTime(startDatePart, nextTime, true);
-                  }}
-                  onBlur={() => {
-                    setIsStartHourFocused(false);
-                    if (startHourInput.trim() === '') {
-                      setStartHourInput(String(startParts.hour12));
-                    }
-                  }}
-                  aria-label="Start hour"
-                />
-                <span className="time-input__separator">:</span>
-                <input
-                  className="time-input time-input--minute"
-                  type="text"
-                  inputMode="numeric"
-                  value={startMinuteInput}
-                  ref={startMinuteRef}
-                  onFocus={() => setIsStartMinuteFocused(true)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      event.currentTarget.blur();
-                    }
-                  }}
-                  onChange={(event) => {
-                    const nextRaw = event.target.value.replace(/[^\d]/g, '');
-                    if (nextRaw.length > 2) return;
-                    setStartMinuteInput(nextRaw);
-                    if (nextRaw === '') return;
-                    const nextMinute = Number(nextRaw);
-                    if (!Number.isFinite(nextMinute)) return;
-                    const nextTime = toTimeValue(
-                      Number(startHourInput || startParts.hour12),
-                      nextMinute,
-                      startParts.period as 'AM' | 'PM',
-                    );
-                    const isDisabled = isStartDateToday && nextTime < nowTime;
-                    if (isDisabled) return;
-                    validateAndSetStartTime(startDatePart, nextTime, true);
-                  }}
-                  onBlur={() => {
-                    setIsStartMinuteFocused(false);
-                    if (startMinuteInput.trim() === '') {
-                      setStartMinuteInput(String(startParts.minute).padStart(2, '0'));
-                    }
-                  }}
-                  aria-label="Start minutes"
-                />
-              </div>
-              <div className="time-input__period time-input__period--stacked">
-                {(['AM', 'PM'] as const).map((period) => (
-                  <button
-                    key={`start-${period}`}
-                    type="button"
-                    className={`time-pill${startParts.period === period ? ' is-selected' : ''}`}
-                    onClick={() => {
-                      const nextTime = toTimeValue(startParts.hour12, startParts.minute, period);
+          </div>
+          <div className="form-row form-row--time">
+            <label>
+              <span className="form-label">
+                Start Date <span className="form-required">*</span>
+              </span>
+              <input
+                type="date"
+                value={startDatePart}
+                onChange={(event) => {
+                  const nextDate = event.target.value;
+                  const timePart = getTimePart(formState.startTime);
+                  validateAndSetStartTime(nextDate, timePart);
+                }}
+                required
+              />
+            </label>
+            <label>
+              <span className="form-label">
+                Start Time <span className="form-required">*</span>
+              </span>
+              <div className="time-box">
+                <div className="time-inputs">
+                  <input
+                    className="time-input time-input--hour"
+                    type="text"
+                    inputMode="numeric"
+                    value={startHourInput}
+                    onFocus={() => setIsStartHourFocused(true)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        startMinuteRef.current?.focus();
+                        startMinuteRef.current?.select();
+                      }
+                    }}
+                    onChange={(event) => {
+                      const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                      if (nextRaw.length > 2) return;
+                      setStartHourInput(nextRaw);
+                      if (nextRaw === '') return;
+                      const nextHour = Number(nextRaw);
+                      if (!Number.isFinite(nextHour)) return;
+                      const nextTime = toTimeValue(
+                        nextHour,
+                        Number(startMinuteInput || startParts.minute),
+                        startParts.period as 'AM' | 'PM',
+                      );
                       const isDisabled = isStartDateToday && nextTime < nowTime;
                       if (isDisabled) return;
                       validateAndSetStartTime(startDatePart, nextTime, true);
                     }}
+                    onBlur={() => {
+                      setIsStartHourFocused(false);
+                      if (startHourInput.trim() === '') {
+                        setStartHourInput(String(startParts.hour12));
+                      }
+                    }}
+                    aria-label="Start hour"
+                  />
+                  <span className="time-input__separator">:</span>
+                  <input
+                    className="time-input time-input--minute"
+                    type="text"
+                    inputMode="numeric"
+                    value={startMinuteInput}
+                    ref={startMinuteRef}
+                    onFocus={() => setIsStartMinuteFocused(true)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        event.currentTarget.blur();
+                      }
+                    }}
+                    onChange={(event) => {
+                      const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                      if (nextRaw.length > 2) return;
+                      setStartMinuteInput(nextRaw);
+                      if (nextRaw === '') return;
+                      const nextMinute = Number(nextRaw);
+                      if (!Number.isFinite(nextMinute)) return;
+                      const nextTime = toTimeValue(
+                        Number(startHourInput || startParts.hour12),
+                        nextMinute,
+                        startParts.period as 'AM' | 'PM',
+                      );
+                      const isDisabled = isStartDateToday && nextTime < nowTime;
+                      if (isDisabled) return;
+                      validateAndSetStartTime(startDatePart, nextTime, true);
+                    }}
+                    onBlur={() => {
+                      setIsStartMinuteFocused(false);
+                      if (startMinuteInput.trim() === '') {
+                        setStartMinuteInput(String(startParts.minute).padStart(2, '0'));
+                      }
+                    }}
+                    aria-label="Start minutes"
+                  />
+                </div>
+                <div className="time-input__period">
+                  <button
+                    type="button"
+                    className="time-pill is-selected"
+                    onClick={() => {
+                      const nextPeriod = startParts.period === 'AM' ? 'PM' : 'AM';
+                      const nextTime = toTimeValue(startParts.hour12, startParts.minute, nextPeriod);
+                      validateAndSetStartTime(startDatePart, nextTime, true);
+                    }}
+                    aria-label={`Start time period: ${startParts.period}, click to switch`}
                   >
-                    {period}
+                    {startParts.period}
                   </button>
-                ))}
+                </div>
               </div>
-            </div>
-          </label>
-        </div>
-        {startTimeWarning && <p className="form-error">{startTimeWarning}</p>}
-        <div className="form-row-labels">
-          <span className="form-label">
-            End Date <span className="form-required">*</span>
-          </span>
-          <span className="form-label">
-            End Time <span className="form-required">*</span>
-          </span>
-        </div>
-        <div className="form-row form-row--time">
-          <label>
+            </label>
+          </div>
+          {startTimeWarning && <p className="form-error">{startTimeWarning}</p>}
+          <div className="form-row-labels">
             <span className="form-label">
               End Date <span className="form-required">*</span>
             </span>
-            <input
-              type="date"
-              value={endDatePart}
-              onChange={(event) => {
-                const nextDate = event.target.value;
-                const timePart = getTimePart(formState.endTime);
-                validateAndSetEndTime(nextDate, timePart);
-              }}
-              required
-            />
-          </label>
-          <label>
             <span className="form-label">
               End Time <span className="form-required">*</span>
             </span>
-            <div className="time-box">
-              <div className="time-inputs">
-                <input
-                  className="time-input time-input--hour"
-                  type="text"
-                  inputMode="numeric"
-                  value={endHourInput}
-                  onFocus={() => setIsEndHourFocused(true)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      endMinuteRef.current?.focus();
-                      endMinuteRef.current?.select();
-                    }
-                  }}
-                  onChange={(event) => {
-                    const nextRaw = event.target.value.replace(/[^\d]/g, '');
-                    if (nextRaw.length > 2) return;
-                    setEndHourInput(nextRaw);
-                    if (nextRaw === '') return;
-                    const nextHour = Number(nextRaw);
-                    if (!Number.isFinite(nextHour)) return;
-                    const nextTime = toTimeValue(
-                      nextHour,
-                      Number(endMinuteInput || endParts.minute),
-                      endParts.period as 'AM' | 'PM',
-                    );
-                    const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
-                    if (isDisabled) return;
-                    validateAndSetEndTime(endDatePart, nextTime);
-                  }}
-                  onBlur={() => {
-                    setIsEndHourFocused(false);
-                    if (endHourInput.trim() === '') {
-                      setEndHourInput(String(endParts.hour12));
-                    }
-                  }}
-                  aria-label="End hour"
-                />
-                <span className="time-input__separator">:</span>
-                <input
-                  className="time-input time-input--minute"
-                  type="text"
-                  inputMode="numeric"
-                  value={endMinuteInput}
-                  ref={endMinuteRef}
-                  onFocus={() => setIsEndMinuteFocused(true)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      event.currentTarget.blur();
-                    }
-                  }}
-                  onChange={(event) => {
-                    const nextRaw = event.target.value.replace(/[^\d]/g, '');
-                    if (nextRaw.length > 2) return;
-                    setEndMinuteInput(nextRaw);
-                    if (nextRaw === '') return;
-                    const nextMinute = Number(nextRaw);
-                    if (!Number.isFinite(nextMinute)) return;
-                    const nextTime = toTimeValue(
-                      Number(endHourInput || endParts.hour12),
-                      nextMinute,
-                      endParts.period as 'AM' | 'PM',
-                    );
-                    const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
-                    if (isDisabled) return;
-                    validateAndSetEndTime(endDatePart, nextTime);
-                  }}
-                  onBlur={() => {
-                    setIsEndMinuteFocused(false);
-                    if (endMinuteInput.trim() === '') {
-                      setEndMinuteInput(String(endParts.minute).padStart(2, '0'));
-                    }
-                  }}
-                  aria-label="End minutes"
-                />
-              </div>
-              <div className="time-input__period time-input__period--stacked">
-                {(['AM', 'PM'] as const).map((period) => (
-                  <button
-                    key={`end-${period}`}
-                    type="button"
-                    className={`time-pill${endParts.period === period ? ' is-selected' : ''}`}
-                    onClick={() => {
-                      const nextTime = toTimeValue(endParts.hour12, endParts.minute, period);
+          </div>
+          <div className="form-row form-row--time">
+            <label>
+              <span className="form-label">
+                End Date <span className="form-required">*</span>
+              </span>
+              <input
+                type="date"
+                value={endDatePart}
+                onChange={(event) => {
+                  const nextDate = event.target.value;
+                  const timePart = getTimePart(formState.endTime);
+                  validateAndSetEndTime(nextDate, timePart);
+                }}
+                required
+              />
+            </label>
+            <label>
+              <span className="form-label">
+                End Time <span className="form-required">*</span>
+              </span>
+              <div className="time-box">
+                <div className="time-inputs">
+                  <input
+                    className="time-input time-input--hour"
+                    type="text"
+                    inputMode="numeric"
+                    value={endHourInput}
+                    onFocus={() => setIsEndHourFocused(true)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        endMinuteRef.current?.focus();
+                        endMinuteRef.current?.select();
+                      }
+                    }}
+                    onChange={(event) => {
+                      const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                      if (nextRaw.length > 2) return;
+                      setEndHourInput(nextRaw);
+                      if (nextRaw === '') return;
+                      const nextHour = Number(nextRaw);
+                      if (!Number.isFinite(nextHour)) return;
+                      const nextTime = toTimeValue(
+                        nextHour,
+                        Number(endMinuteInput || endParts.minute),
+                        endParts.period as 'AM' | 'PM',
+                      );
                       const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
                       if (isDisabled) return;
                       validateAndSetEndTime(endDatePart, nextTime);
                     }}
+                    onBlur={() => {
+                      setIsEndHourFocused(false);
+                      if (endHourInput.trim() === '') {
+                        setEndHourInput(String(endParts.hour12));
+                      }
+                    }}
+                    aria-label="End hour"
+                  />
+                  <span className="time-input__separator">:</span>
+                  <input
+                    className="time-input time-input--minute"
+                    type="text"
+                    inputMode="numeric"
+                    value={endMinuteInput}
+                    ref={endMinuteRef}
+                    onFocus={() => setIsEndMinuteFocused(true)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        event.currentTarget.blur();
+                      }
+                    }}
+                    onChange={(event) => {
+                      const nextRaw = event.target.value.replace(/[^\d]/g, '');
+                      if (nextRaw.length > 2) return;
+                      setEndMinuteInput(nextRaw);
+                      if (nextRaw === '') return;
+                      const nextMinute = Number(nextRaw);
+                      if (!Number.isFinite(nextMinute)) return;
+                      const nextTime = toTimeValue(
+                        Number(endHourInput || endParts.hour12),
+                        nextMinute,
+                        endParts.period as 'AM' | 'PM',
+                      );
+                      const isDisabled = isEndDateSameAsStart && nextTime <= startTimePart;
+                      if (isDisabled) return;
+                      validateAndSetEndTime(endDatePart, nextTime);
+                    }}
+                    onBlur={() => {
+                      setIsEndMinuteFocused(false);
+                      if (endMinuteInput.trim() === '') {
+                        setEndMinuteInput(String(endParts.minute).padStart(2, '0'));
+                      }
+                    }}
+                    aria-label="End minutes"
+                  />
+                </div>
+                <div className="time-input__period">
+                  <button
+                    type="button"
+                    className="time-pill is-selected"
+                    onClick={() => {
+                      const nextPeriod = endParts.period === 'AM' ? 'PM' : 'AM';
+                      const nextTime = toTimeValue(endParts.hour12, endParts.minute, nextPeriod);
+                      validateAndSetEndTime(endDatePart, nextTime);
+                    }}
+                    aria-label={`End time period: ${endParts.period}, click to switch`}
                   >
-                    {period}
+                    {endParts.period}
                   </button>
-                ))}
+                </div>
               </div>
-            </div>
-          </label>
-        </div>
-        {endTimeWarning && <p className="form-error">{endTimeWarning}</p>}
-        <label>
-          <span className="form-label">
-            Max Participants <span className="form-required">*</span>
-          </span>
-          <input
-            type="number"
-            min={2}
-            max={50}
-            value={formState.maxParticipants}
-            onChange={(event) => {
-              const nextValue = event.target.valueAsNumber;
-              const cappedValue = Number.isNaN(nextValue) ? '' : Math.min(nextValue, 50);
-              setMaxParticipantsWarning(
-                Number.isNaN(nextValue)
-                  ? ''
-                  : nextValue > 50
-                    ? 'Max participants cannot exceed 50.'
-                    : nextValue < 2
-                      ? 'Max participants must be at least 2.'
-                      : '',
-              );
-              setFormState((prev) => ({
-                ...prev,
-                maxParticipants: cappedValue,
-              }));
-            }}
-          />
-          {maxParticipantsWarning && (
-            <p className="form-error">{maxParticipantsWarning}</p>
-          )}
-        </label>
-        <div className="form-row">
+            </label>
+          </div>
+          {endTimeWarning && <p className="form-error">{endTimeWarning}</p>}
           <label>
             <span className="form-label">
-              Activity Type <span className="form-required">*</span>
+              Max Participants <span className="form-required">*</span>
             </span>
-            <div className="form-select" ref={activityMenuRef}>
-              <button
-                type="button"
-                className="form-select__button"
-                aria-haspopup="listbox"
-                aria-expanded={isActivityMenuOpen}
-                onClick={() => {
-                  setIsActivityMenuOpen((prev) => !prev);
-                  setIsAreaMenuOpen(false);
-                }}
-              >
-                {formState.activityType}
-              </button>
-              {isActivityMenuOpen && (
-                <div className="form-select__menu" role="listbox">
-                  {ACTIVITY_FILTERS.filter((activity) => activity !== 'All').map(
-                    (activity) => (
+            <input
+              type="number"
+              min={2}
+              max={50}
+              value={formState.maxParticipants}
+              onChange={(event) => {
+                const nextValue = event.target.valueAsNumber;
+                const cappedValue = Number.isNaN(nextValue) ? '' : Math.min(nextValue, 50);
+                setMaxParticipantsWarning(
+                  Number.isNaN(nextValue)
+                    ? ''
+                    : nextValue > 50
+                      ? 'Max participants cannot exceed 50.'
+                      : nextValue < 2
+                        ? 'Max participants must be at least 2.'
+                        : '',
+                );
+                setFormState((prev) => ({
+                  ...prev,
+                  maxParticipants: cappedValue,
+                }));
+              }}
+            />
+            {maxParticipantsWarning && (
+              <p className="form-error">{maxParticipantsWarning}</p>
+            )}
+          </label>
+          <div className="form-row">
+            <label>
+              <span className="form-label">
+                Activity Type <span className="form-required">*</span>
+              </span>
+              <div className="form-select" ref={activityMenuRef}>
+                <button
+                  type="button"
+                  className="form-select__button"
+                  aria-haspopup="listbox"
+                  aria-expanded={isActivityMenuOpen}
+                  onClick={() => {
+                    setIsActivityMenuOpen((prev) => !prev);
+                    setIsAreaMenuOpen(false);
+                  }}
+                >
+                  {formState.activityType}
+                </button>
+                {isActivityMenuOpen && (
+                  <div className="form-select__menu" role="listbox">
+                    {ACTIVITY_FILTERS.filter((activity) => activity !== 'All').map(
+                      (activity) => (
+                        <button
+                          key={activity}
+                          type="button"
+                          role="option"
+                          aria-selected={activity === formState.activityType}
+                          className={`sort-option${activity === formState.activityType ? ' sort-option--active' : ''
+                            }`}
+                          onClick={() => {
+                            setFormState((prev) => ({
+                              ...prev,
+                              activityType: activity,
+                            }));
+                            setIsActivityMenuOpen(false);
+                          }}
+                        >
+                          {activity}
+                        </button>
+                      ),
+                    )}
+                  </div>
+                )}
+              </div>
+            </label>
+            <label>
+              <span className="form-label">
+                Area <span className="form-required">*</span>
+              </span>
+              <div className="form-select" ref={areaMenuRef}>
+                <button
+                  type="button"
+                  className="form-select__button"
+                  aria-haspopup="listbox"
+                  aria-expanded={isAreaMenuOpen}
+                  onClick={() => {
+                    setIsAreaMenuOpen((prev) => !prev);
+                    setIsActivityMenuOpen(false);
+                  }}
+                >
+                  {formState.area}
+                </button>
+                {isAreaMenuOpen && (
+                  <div className="form-select__menu" role="listbox">
+                    {AREA_FILTERS.filter((area) => area !== 'All').map((area) => (
                       <button
-                        key={activity}
+                        key={area}
                         type="button"
                         role="option"
-                        aria-selected={activity === formState.activityType}
-                        className={`sort-option${
-                          activity === formState.activityType ? ' sort-option--active' : ''
-                        }`}
+                        aria-selected={area === formState.area}
+                        className={`sort-option${area === formState.area ? ' sort-option--active' : ''}`}
                         onClick={() => {
-                          setFormState((prev) => ({
-                            ...prev,
-                            activityType: activity,
-                          }));
-                          setIsActivityMenuOpen(false);
+                          setFormState((prev) => ({ ...prev, area }));
+                          setIsAreaMenuOpen(false);
                         }}
                       >
-                        {activity}
+                        {area}
                       </button>
-                    ),
-                  )}
-                </div>
-              )}
-            </div>
-          </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </label>
+          </div>
           <label>
-            <span className="form-label">
-              Area <span className="form-required">*</span>
+            <span>Signup Prompts</span>
+            <span className="form-helper">
+              Add questions or notices for attendees when they sign up.
             </span>
-            <div className="form-select" ref={areaMenuRef}>
-              <button
-                type="button"
-                className="form-select__button"
-                aria-haspopup="listbox"
-                aria-expanded={isAreaMenuOpen}
-                onClick={() => {
-                  setIsAreaMenuOpen((prev) => !prev);
-                  setIsActivityMenuOpen(false);
-                }}
-              >
-                {formState.area}
-              </button>
-              {isAreaMenuOpen && (
-                <div className="form-select__menu" role="listbox">
-                  {AREA_FILTERS.filter((area) => area !== 'All').map((area) => (
-                    <button
-                      key={area}
-                      type="button"
-                      role="option"
-                      aria-selected={area === formState.area}
-                      className={`sort-option${area === formState.area ? ' sort-option--active' : ''}`}
-                      onClick={() => {
-                        setFormState((prev) => ({ ...prev, area }));
-                        setIsAreaMenuOpen(false);
-                      }}
-                    >
-                      {area}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <textarea
+              rows={2}
+              value={formState.signupPrompt}
+              onChange={(event) =>
+                setFormState((prev) => ({ ...prev, signupPrompt: event.target.value }))
+              }
+              placeholder="Example: Share your phone number so we can coordinate."
+            />
           </label>
-        </div>
-        <label>
-          <span>Signup Prompts</span>
-          <span className="form-helper">
-            Add questions or notices for attendees when they sign up.
-          </span>
-          <textarea
-            rows={2}
-            value={formState.signupPrompt}
-            onChange={(event) =>
-              setFormState((prev) => ({ ...prev, signupPrompt: event.target.value }))
-            }
-            placeholder="Example: Share your phone number so we can coordinate."
-          />
-        </label>
-        {formError && <p className="form-error">{formError}</p>}
-        <button
-          className={`btn btn--primary${isFormComplete ? '' : ' btn--disabled'}`}
-          type="submit"
-          disabled={!isFormComplete}
-        >
-          Post Move
-        </button>
-      </form>
+          {formError && <p className="form-error">{formError}</p>}
+          <button
+            className={`btn btn--primary${isFormComplete ? '' : ' btn--disabled'}`}
+            type="submit"
+            disabled={!isFormComplete}
+          >
+            Post Move
+          </button>
+        </form>
       </section>
     </div>
   );

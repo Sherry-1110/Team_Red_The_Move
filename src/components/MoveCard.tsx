@@ -52,9 +52,9 @@ export const MoveCard = ({
   const isPast = statusLabel === 'Past';
   const isJoinDisabled = !isJoined && (isFull || isPast);
   const { isSaved, toggleSave } = useSavedMoves();
-  
+
   // Calculate distance if not provided but userLocation is available
-  const displayDistance = distance || (userLocation && move.latitude && move.longitude 
+  const displayDistance = distance || (userLocation && move.latitude && move.longitude
     ? formatDistance(calculateDistance(userLocation.latitude, userLocation.longitude, move.latitude, move.longitude))
     : null);
 
