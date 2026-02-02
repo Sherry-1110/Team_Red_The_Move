@@ -9,11 +9,30 @@ import { auth } from '../firebase';
 
 const googleProvider = new GoogleAuthProvider();
 
+const EDU_DOMAIN_SUFFIX = '.edu';
+
+function isEduEmail(email: string | null): boolean {
+  if (!email) return false;
+  return email.toLowerCase().endsWith(EDU_DOMAIN_SUFFIX);
+}
+
 export const signInWithGoogle = async (): Promise<FirebaseUser> => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
-    return result.user;
+    const user = result.user;
+
+    if (!isEduEmail(user.email)) {
+      await firebaseSignOut(auth);
+      throw new Error(
+        'Access Restricted: Please sign in with your Northwestern or other .edu school email.',
+      );
+    }
+
+    return user;
   } catch (error) {
+    if (error instanceof Error && error.message.includes('Access Restricted')) {
+      throw error;
+    }
     console.error('Error signing in with Google:', error);
     throw error;
   }

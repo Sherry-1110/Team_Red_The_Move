@@ -16,7 +16,11 @@ export const LoginScreen = ({ onSignIn }: LoginScreenProps) => {
       await signInWithGoogle();
       onSignIn();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in');
+      const message = err instanceof Error ? err.message : 'Failed to sign in';
+      setError(message);
+      if (message.includes('Access Restricted')) {
+        alert(message);
+      }
     } finally {
       setLoading(false);
     }
