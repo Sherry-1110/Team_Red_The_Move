@@ -821,18 +821,18 @@ export const CreateMoveScreen = ({ onCreateMove, onClose }: CreateMoveScreenProp
             </label>
           </div>
           <label>
-            <span>Signup Prompts</span>
+            {/* <span>Signup Prompts</span>
             <span className="form-helper">
               Add questions or notices for attendees when they sign up.
-            </span>
-            <textarea
+            </span> */}
+            {/* <textarea
               rows={2}
               value={formState.signupPrompt}
               onChange={(event) =>
                 setFormState((prev) => ({ ...prev, signupPrompt: event.target.value }))
               }
               placeholder="Example: Share your phone number so we can coordinate."
-            />
+            /> */}
           </label>
           {formError && <p className="form-error">{formError}</p>}
           <button
