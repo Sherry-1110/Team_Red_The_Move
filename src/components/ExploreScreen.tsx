@@ -599,6 +599,8 @@ export const ExploreScreen = ({
               userName={userName}
               onJoinMove={onJoinMove}
               onLeaveMove={onLeaveMove}
+              onJoinWaitlist={onJoinWaitlist}
+              onLeaveWaitlist={onLeaveWaitlist}
               onSelectMove={onSelectMove}
               userLocation={userLocation}
               onClose={() => setViewMode('list')}

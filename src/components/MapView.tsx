@@ -139,6 +139,8 @@ type MapViewProps = {
   userName: string;
   onJoinMove: (moveId: string) => void;
   onLeaveMove: (moveId: string) => void;
+  onJoinWaitlist: (moveId: string) => void;
+  onLeaveWaitlist: (moveId: string) => void;
   onSelectMove: (moveId: string) => void;
   userLocation?: { latitude: number; longitude: number } | null;
   onClose?: () => void;
@@ -150,6 +152,8 @@ export const MapView = ({
   userName,
   onJoinMove,
   onLeaveMove,
+  onJoinWaitlist,
+  onLeaveWaitlist,
   onSelectMove,
   userLocation,
   onClose,
@@ -225,6 +229,8 @@ export const MapView = ({
                     userName={userName}
                     onJoinMove={onJoinMove}
                     onLeaveMove={onLeaveMove}
+                    onJoinWaitlist={onJoinWaitlist}
+                    onLeaveWaitlist={onLeaveWaitlist}
                     onSelectMove={onSelectMove}
                     userLocation={userLocation}
                   />

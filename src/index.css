@@ -144,6 +144,22 @@ img {
   display: grid;
   gap: 20px;
   padding-left: 0;
+  position: relative;
+}
+
+/* Mobile: prevent sign out button from overlapping title */
+@media (max-width: 600px) {
+  .app-header {
+    padding-right: 0;
+  }
+
+  .app-header > div:first-child {
+    max-width: calc(100% - 90px);
+  }
+
+  .app-header h1 {
+    font-size: clamp(2rem, 5vw, 2.5rem);
+  }
 }
 
 .eyebrow {
@@ -1250,6 +1266,20 @@ img {
     max-width: 100%;
     padding-left: 16px;
     padding-right: 16px;
+  }
+}
+
+/* Mobile: reduce tab padding and font size to fit all tabs */
+@media (max-width: 600px) {
+  .my-moves-tab {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+    min-width: 0;
+  }
+
+  .my-moves-tabs {
+    gap: 4px;
+    padding: 4px;
   }
 }
 
